@@ -124,7 +124,7 @@ def input():
 # 定义一个路由，用于微信小程序请求和网页聊天请求
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
-    logging.info("request:" + json.dumps(request.json))
+    #logging.info("request:" + json.dumps(request.json))
     responseStr = None
     ip = request.remote_addr
     # 获取body中的字段messages
@@ -158,8 +158,8 @@ def hangpt():
     except Exception as e:
         logging.info(e)
         return "未知错误，请联系hamburger"
-    finally:
-        logging.info("ip:%s, use key:%s, messages:%s, response:%s", ip, openai.api_key, str(messages), responseStr)
+    # finally:
+    #     logging.info("ip:%s, use key:%s, messages:%s", ip, openai.api_key, str(messages))
 
 
 # 定义一个路由，用于微信小程序请求
