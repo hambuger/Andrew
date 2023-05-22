@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>对话ChatGPT</title>
+    <link rel="icon"  href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        /* 设置页面的样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        .header {
+            text-align: center;
+        }
+        .content {
+            height: 500px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+        .message {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .user {
+            background-color: #e0e0e0;
+            text-align: right;
+        }
+        .chatgpt {
+            background-color: #d0d0ff;
+            text-align: left;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            /* Add a border-radius property to make the avatar round */
+            border-radius: 50%;
+        }
+        .text {
+            display: inline-block;
+            max-width: 600px;
+        }
+        /* 设置输入框和按钮的共同样式 */
+        .input, #submit {
+            /* 设置高度为40像素 */
+            height: 40px;
+            /* 设置垂直居中 */
+            vertical-align: middle;
+            /* 设置字体大小为16像素 */
+            font-size: 16px;
+        }
+
+        /* 设置输入框的样式 */
+        .input {
+            /* 设置宽度为80% */
+            width: 80%;
+            /* 设置左边距为10像素 */
+            margin-left: 10px;
+            /* 设置右边距为10像素 */
+            margin-right: 10px;
+            /* 设置内边距为5像素 */
+            padding: 5px;
+            /* 设置边框为1像素的实线，颜色为灰色 */
+            border: 1px solid gray;
+            /* 设置圆角为5像素 */
+            border-radius: 5px;
+        }
+    
+        /* 设置按钮的样式 */
+        #submit {
+            /* 设置宽度为10% */
+            width: 10%;
+            /* 设置背景颜色为蓝色 */
+            background-color: blue;
+            /* 设置字体颜色为白色 */
+            color: white;
+            /* 设置边框为无 */
+            border: none;
+            /* 设置圆角为5像素 */
+            border-radius: 5px;
+        }
+
+        /* 添加媒体查询 */
+        @media (max-width: 600px) {
+          /* 在视口宽度小于等于600px时应用以下样式 */
+          .container {
+            width: 100%;
+          }
+          .input {
+            width: 80%;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>对话ChatGPT</h1>
+        </div>
+        <div class="content" id="content">
+            <!-- 遍历对话历史，显示每一条消息 -->
+            {% for message in history %}
+                <div class="message {{ message.role }}">
+                    <!-- 根据发言者，显示不同的头像 -->
+                    {% if message.role == 'user' %}
+                        <img src="{{ url_for('static', filename='user.png') }}" class="avatar">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar">
+                    {% endif %}
+                    <!-- 显示消息的文本 -->
+                    <span>{{ message.content }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="footer">
+            <!-- 创建一个表单，用于获取用户的输入 -->
+            <form id="form" method="post" action="/input">
+                <!-- 创建一个输入框，用于输入消息 -->
+                <input type="text" name="user_input" class="input" id="input" placeholder="请输入你想说的话...">
+                <!-- 创建一个按钮，用于提交消息 -->
+                <button type="submit" id="submit">发送</button>
+            </form>
+        </div>
+    </div>
+    <!-- 引入jQuery库，用于简化AJAX操作 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 添加自定义的JavaScript代码，用于实现异步更新 -->
+    <script>
+        // 当文档加载完成后，执行以下函数
+    $(document).ready(function() {
+    // 发送一个空的ajax请求，获取最近一条消息
+    $.ajax({
+        url: encodeURI("/input"), // 请求的URL
+        type: "POST", // 请求的类型
+        data: {user_input: "我回来了"}, // 请求的数据为空
+        success: function(chatgpt_reply) { // 请求成功后的回调函数
+            // 把服务器返回的数据添加到对话框中
+            var chatgpt_message = `<div class="message chatgpt"><img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar"><span class="text">${chatgpt_reply}</span></div>`;
+            $("#content").append(chatgpt_message);
+            $("#content").scrollTop($("#content")[0].scrollHeight);
+        }
+    });
+});
+      // 当文档加载完成后，执行以下函数
+      $(document).ready(function() {
+          // 当表单被提交时，执行以下函数
+          $("#form").submit(function(event) {
+              // 阻止表单的默认行为，即刷新页面
+              event.preventDefault();
+              // 获取用户的输入
+              var user_input = $("#input").val();
+              // 如果用户的输入不为空
+              if (user_input) {
+                  // 把用户的输入添加到对话框中
+                  var user_message = `<div class="message user"><img src="{{ url_for('static', filename='user.png') }}" class="avatar"><span class="text">${user_input}</span></div>`;
+                  $("#content").append(user_message);
+                  // 清空输入框的内容
+                  $("#input").val("");
+                  // 滚动到底部
+                  $("#content").scrollTop($("#content")[0].scrollHeight);
+                  // 使用AJAX向服务器发送请求
+                  $.ajax({
+                      url: encodeURI("/input"), // 请求的URL
+                      type: "POST", // 请求的方法
+                      data: {user_input: user_input}, // 请求的数据
+                      dataType: "text", // 期望的响应数据类型
+                      success: function(data) { // 请求成功后的回调函数
+                          var chatgpt_message = `<div class="message chatgpt"><img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar"><span class="text">${data}</span></div>`;
+                              $("#content").append(chatgpt_message);
+                              // 滚动到底部
+                              $("#content").scrollTop($("#content")[0].scrollHeight);
+                      },
+                      error: function(xhr) { // 请求失败或超时后的回调函数
+                            alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                      }
+                  });
+              }
+          });
+      });
+</script>
+<div style="text-align: center; margin-top: 20px;">
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow">浙ICP备2023012686号-1</a>
+</div>
+</body>
+</html>
