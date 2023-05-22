@@ -134,6 +134,7 @@ def hangpt():
         stream = request.json.get('stream') or False
         openai.api_key = get_valid_openai_key()
         logging.info("messages:{}, stream:{}".format(messages, stream))
+        logging.info("id:{}, parentId:{}".format(messages[-1].get("id"), messages[-2].get("id")))
         for d in messages:
             d.pop("id", None)
             d.pop("parentId", None)
