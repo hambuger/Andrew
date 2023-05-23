@@ -73,7 +73,9 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
     logging.info("insert_document start")
     try:
         openai.api_key = api_key_manager.get_key()
+        logging.info("openai.api_key:{}", openai.api_key)
         embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
+        logging.info("embedding.result:{}", embedding.result)
         content_vector = np.array(embedding.result).tolist()
 
         # 获取当前时间
