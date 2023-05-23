@@ -165,7 +165,7 @@ def hangpt():
         return "未知错误，请联系hamburger"
     finally:
         logging.info("all_contents:{}".format(all_contents))
-        if (all_contents):
+        if all_contents:
             logging.info("botMsgId:{}".format(botMsgId))
             logging.info("messageId:{}".format(messageId))
             logging.info("client_ip:{}".format(client_ip))
