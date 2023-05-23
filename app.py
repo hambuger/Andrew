@@ -127,7 +127,7 @@ def input():
 def generateNewContent(content, content_vector, creator):
     try:
         response = query_vector_to_string(content_vector, creator)
-        if not response:
+        if response['hits']['total']['value'] == 0:
             return content
         content_list = []
         node_id_list = []
