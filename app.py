@@ -150,15 +150,24 @@ def hangpt():
             stream=stream
         )
         def stream_response():
+            global botMsgId
             for chunk in response:
+                content = chunk['choices'][0]['delta'].get('content', '')
+                all_contents.append(content)
+                botMsgId = chunk['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
+            logging.info("botMsgId:{}".format(botMsgId))
+            logging.info("all_contents:{}".format(all_contents))
+
 
         if stream:
-            streamResponse = stream_response()
-            for chunk in streamResponse:
-                content = json.loads(chunk.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
-                all_contents.append(content)
-                botMsgId = json.loads(chunk.split("data: ", 1)[1])['id']
+            # streamResponse = stream_response()
+            # id2 = None
+            # all_contents2 = []
+            # for chunk in streamResponse:
+            #     content = json.loads(chunk.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
+            #     all_contents2.append(content)
+            #     id2 = json.loads(chunk.split("data: ", 1)[1])['id']
             response_gen = stream_response()
             return Response(response_gen, mimetype='application/octet-stream', content_type='application/json')
         else:
@@ -170,8 +179,8 @@ def hangpt():
         logging.info("all_contents:{}".format(all_contents))
         if all_contents:
             logging.info("botMsgId:{}".format(botMsgId))
-            logging.info("messageId:{}".format(messageId))
-            logging.info("client_ip:{}".format(client_ip))
+            # logging.info("messageId:{}".format(messageId))
+            # logging.info("client_ip:{}".format(client_ip))
             logging.info("all_contents:{}".format(''.join(all_contents)))
             embedding = openai.Embedding.create(input=[''.join(all_contents)], model="text-embedding-ada-002")
             content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
