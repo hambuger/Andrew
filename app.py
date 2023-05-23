@@ -158,7 +158,7 @@ def hangpt():
             for chunk in streamResponse:
                 content = json.loads(chunk.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
                 all_contents.append(content)
-                messageId = json.loads(chunk.split("data: ", 1)[1])['id']
+                botMsgId = json.loads(chunk.split("data: ", 1)[1])['id']
             return Response(streamResponse, mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
