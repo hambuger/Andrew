@@ -149,7 +149,7 @@ def hangpt():
         )
         def stream_response():
             for chunk in response:
-                content = chunk['choices'][0]['delta']['content'] or ''
+                content = chunk['choices'][0]['delta'].get('content', '')
                 all_contents.append(content)
                 botMsgId = chunk['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
