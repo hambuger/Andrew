@@ -60,29 +60,34 @@ def query_vector_to_string(query_vector, content_owner):
 # 插入文档
 def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance):
     # 使用OpenAI的embedding生成向量
-    embedding = openai.Embedding.create(content=content, model="text-embedding-ada-002")
-    content_vector = np.array(embedding.result).tolist()
+    try:
+        embedding = openai.Embedding.create(content=content, model="text-embedding-ada-002")
+        content_vector = np.array(embedding.result).tolist()
 
-    # 获取当前时间
-    current_time = datetime.now()
+        # 获取当前时间
+        current_time = datetime.now()
 
-    # 创建文档
-    doc = {
-        "content_node_id": content_node_id,
-        "content_leaf_depth": 0,  # 这里假设叶子深度为0，你可以根据需要进行修改
-        "content_creator": creator,  # 这里假设内容创建者为"creator"，你可以根据需要进行修改
-        "content_creation_time": current_time,
-        "content_last_access_time": current_time,
-        "generated_content": content,
-        "content_importance": importance,
-        "content_type": 1,
-        "content_vector": content_vector,
-        "content_owner": content_owner,
-        "creator_ip": creator_ip,
-        "parent_id": parent_id
-    }
-    docId = content_owner + "_" + content_node_id
-    # 插入文档
-    res = es.index(index="lang_chat_content", body=doc, id=docId)
+        # 创建文档
+        doc = {
+            "content_node_id": content_node_id,
+            "content_leaf_depth": 0,  # 这里假设叶子深度为0，你可以根据需要进行修改
+            "content_creator": creator,  # 这里假设内容创建者为"creator"，你可以根据需要进行修改
+            "content_creation_time": current_time,
+            "content_last_access_time": current_time,
+            "generated_content": content,
+            "content_importance": importance,
+            "content_type": 1,
+            "content_vector": content_vector,
+            "content_owner": content_owner,
+            "creator_ip": creator_ip,
+            "parent_id": parent_id
+        }
+        docId = content_owner + "_" + content_node_id
+        # 插入文档
+        res = es.index(index="lang_chat_content", body=doc, id=docId)
 
-    return res
+        return res
+    except Exception as e:
+        print(e)
+    finally:
+        print("insert_document finished")

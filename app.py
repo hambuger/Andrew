@@ -141,7 +141,7 @@ def hangpt():
         for d in messages:
             d.pop("id", None)
         # 持久化对话信息
-        # insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
+        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
