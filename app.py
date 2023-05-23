@@ -128,7 +128,7 @@ def hangpt():
     logging.info('Client IP is: {}'.format(client_ip))
     # 获取body中的字段messages
     messages = request.json.get('messages')
-    botMsgText = ''
+    all_contents = []
     botMsgId = ''
     logging.info("messages: {}".format(messages))
     messageId = messages[-1].get("id")
@@ -148,10 +148,10 @@ def hangpt():
             stream=stream
         )
         def stream_response():
-            global botMsgText, botMsgId
             for chunk in response:
-                botMsgText = botMsgText + chunk['choices'][0]['message']['content']
-                botMsgId = chunk['choices'][0]['message']['id']
+                content = chunk['choices'][0]['message']['content']
+                all_contents.append(content)
+                botMsgId = chunk['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
         if stream:
@@ -162,8 +162,8 @@ def hangpt():
         logging.info(e)
         return "未知错误，请联系hamburger"
     finally:
-        if (botMsgText != ''):
-            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
+        if (all_contents):
+            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', all_contents, 0.5)
 
 
 
