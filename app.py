@@ -9,6 +9,7 @@ import logging
 import json
 from langchat import query_vector_to_string, insert_document
 from keycache import ApiKeyManager
+import numpy as np
 
 # 创建一个flask应用
 app = Flask(__name__)
@@ -142,7 +143,10 @@ def hangpt():
             d.pop("id", None)
         # 持久化对话信息
         logging.info("message content:{}".format(content))
-        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
+        embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
+        logging.info("embedding.result:{}", embedding.result)
+        content_vector = np.array(embedding.result).tolist()
+        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,

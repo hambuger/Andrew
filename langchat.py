@@ -1,6 +1,4 @@
 from datetime import datetime
-import numpy as np
-import openai
 from elasticsearch import Elasticsearch
 import logging
 from keycache import ApiKeyManager
@@ -68,16 +66,10 @@ def query_vector_to_string(query_vector, content_owner):
 
 
 # 插入文档
-def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance):
+def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance, content_vector):
     # 使用OpenAI的embedding生成向量
     logging.info("insert_document start")
     try:
-        openai.api_key = api_key_manager.get_key()
-        logging.info("openai.api_key:{}", openai.api_key)
-        embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
-        logging.info("embedding.result:{}", embedding.result)
-        content_vector = np.array(embedding.result).tolist()
-
         # 获取当前时间
         current_time = datetime.now()
 
