@@ -4,7 +4,7 @@ import openai
 from elasticsearch import Elasticsearch
 
 # 实例化 Elasticsearch 客户端
-es = Elasticsearch(hosts=["localhost:9200"])
+es = Elasticsearch(hosts=["http://localhost:9200"])
 
 
 #  查询相关的文本内容
