@@ -156,13 +156,13 @@ def hangpt():
                 botMsgId = chunk['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
-        # 列表推导式，解析JSON字符串并提取"text"字段的值
-        text_list = [json.loads(data.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '') for data in stream_response() if 'content' in data]
-
-        # 将text_list中的所有字符串拼接成一个大字符串
-        text_combined = ''.join(text_list)
-
-        logging.info("text_combined: {}".format(text_combined))
+        # # 列表推导式，解析JSON字符串并提取"text"字段的值
+        # text_list = [json.loads(data.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '') for data in stream_response() if 'content' in data]
+        #
+        # # 将text_list中的所有字符串拼接成一个大字符串
+        # text_combined = ''.join(text_list)
+        #
+        # logging.info("text_combined: {}".format(text_combined))
 
         if stream:
             return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
@@ -173,7 +173,11 @@ def hangpt():
     finally:
         logging.info("all_contents:{}".format(all_contents))
         if (all_contents):
-            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', all_contents, 0.5)
+            logging.info("botMsgId:{}".format(botMsgId))
+            logging.info("messageId:{}".format(messageId))
+            logging.info("client_ip:{}".format(client_ip))
+            logging.info("all_contents:{}".format(''.join(all_contents)))
+            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', ''.join(all_contents), 0.5)
 
 
 
