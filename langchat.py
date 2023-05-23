@@ -2,6 +2,15 @@ from datetime import datetime
 import numpy as np
 import openai
 from elasticsearch import Elasticsearch
+import logging
+
+# 保存日志
+logging.basicConfig(
+    filename='app.log',
+    level=logging.INFO,
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p'
+)
 
 # 实例化 Elasticsearch 客户端
 es = Elasticsearch(hosts=["http://localhost:9200"])
@@ -60,7 +69,7 @@ def query_vector_to_string(query_vector, content_owner):
 # 插入文档
 def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance):
     # 使用OpenAI的embedding生成向量
-    print("insert_document start")
+    logging.info("insert_document start")
     try:
         embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
         content_vector = np.array(embedding.result).tolist()
@@ -89,6 +98,6 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
 
         return res
     except Exception as e:
-        print(e)
+        logging.info(e)
     finally:
-        print("insert_document finished")
+        logging.info("insert_document finished")
