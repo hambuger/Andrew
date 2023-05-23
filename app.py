@@ -163,7 +163,10 @@ def hangpt():
         return "未知错误，请联系hamburger"
     finally:
         if (botMsgText != ''):
-            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
+            try:
+                insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
+            except Exception as e:
+                logging.info(e)
 
 
 
