@@ -165,7 +165,7 @@ def hangpt():
         else:
             return response
     except Exception as e:
-        logging.info(e)
+        logging.info(f"An error occurred: {e}")
         return "未知错误，请联系hamburger"
     finally:
         if (all_contents):
