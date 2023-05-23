@@ -158,7 +158,7 @@ def hangpt():
     all_contents = []
     botMsgId = ''
     logging.info("messages: {}".format(messages))
-    logging.info("request:{}".format(request.json))
+    userName = request.json.get('user_name') or 'default'
     messageId = messages[-1].get("id")
     try:
         # stream为空则为false
@@ -171,10 +171,10 @@ def hangpt():
         # 持久化对话信息
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-        gpt_content = generateNewContent(content, content_vector, "hamburger")
+        gpt_content = generateNewContent(content, content_vector, userName)
         logging.info("gpt_content: {}".format(gpt_content))
         messages[-1]['content'] = gpt_content
-        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
+        insert_document(messageId, parentId, client_ip, userName, userName, content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -189,7 +189,7 @@ def hangpt():
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
             embedding = openai.Embedding.create(input=[''.join(all_contents)], model="text-embedding-ada-002")
             content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', ''.join(all_contents), 0.5,
+            insert_document(botMsgId, messageId, client_ip, userName, 'gpt-3.5', ''.join(all_contents), 0.5,
                             content_vector)
 
         if stream:
