@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, session, Response
 # 导入openai模块
 import openai
+from openai import OpenAIError
 import sys
 import time
 # 导入logging模块
@@ -164,12 +165,8 @@ def hangpt():
             return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
-    except Exception as e:
-        logging.info(f"An error occurred: {e}")
-        if hasattr(e, 'args'):
-            logging.error(f"Error arguments: {e.args}")
-        if hasattr(e, 'message'):
-            logging.error(f"Error message: {e.message}")
+    except OpenAIError as e:
+        logging.info("error:{}", e._message)
         return "未知错误，请联系hamburger"
     finally:
         if (all_contents):
