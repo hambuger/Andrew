@@ -127,6 +127,8 @@ def input():
 def generateNewContent(content, content_vector, creator):
     try:
         response = query_vector_to_string(content_vector, creator)
+        if not response:
+            return content
         content_list = []
         node_id_list = []
         for i, hit in enumerate(response['hits']['hits']):
@@ -143,9 +145,7 @@ def generateNewContent(content, content_vector, creator):
         for i, contentStr in enumerate(content_list):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
-        result = "  MEMORIES sorted in relevance:\n" + result + "\n" \
-                 + "Based on chat message history and memories, respond to the query:" + "\"" + content + \
-                 "\".\nYou don't have to refer to them if they aren't useful."
+        result = "MEMORIES sorted in relevance:\n" + result + "\nBased on chat message history and memories, respond to the query:" + "\"" + content + "\".\nYou don't have to refer to them if they aren't useful."
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
