@@ -148,6 +148,7 @@ def hangpt():
             messages=messages,
             stream=stream
         )
+        logging.info("openai get response")
         def stream_response():
             for chunk in response:
                 content = chunk['choices'][0]['delta'].get('content', '')
