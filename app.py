@@ -159,7 +159,8 @@ def hangpt():
                 content = json.loads(chunk.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
                 all_contents.append(content)
                 botMsgId = json.loads(chunk.split("data: ", 1)[1])['id']
-            return Response(streamResponse, mimetype='application/octet-stream', content_type='application/json')
+            response_gen = stream_response()
+            return Response(response_gen, mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
     except Exception as e:
