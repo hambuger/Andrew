@@ -124,23 +124,17 @@ def input():
 # 定义一个路由，用于微信小程序请求和网页聊天请求
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
-    logging.info("request ip:" + json.dumps(request.remote_addr))
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
     logging.info('Client IP is: {}'.format(client_ip))
-    client_ip2 = request.headers.get('X-Real-IP')
-    logging.info('Client IP2 is: {}'.format(client_ip2))
-    responseStr = None
-    ip = request.remote_addr
     # 获取body中的字段messages
     messages = request.json.get('messages')
     try:
         # stream为空则为false
         stream = request.json.get('stream') or False
         openai.api_key = get_valid_openai_key()
-        logging.info("id:{}, parentId:{}".format(messages[-1].get("id"), messages[-2].get("id")))
+        logging.info("messages:{}", messages)
         for d in messages:
             d.pop("id", None)
-            d.pop("parentId", None)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -152,18 +146,12 @@ def hangpt():
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
         if stream:
-            # 设置 MIME 类型和 Content-Type 为流式数据
-            reuslt = Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
-            responseStr = reuslt
-            return reuslt
+            return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
         else:
-            responseStr = response
             return response
     except Exception as e:
         logging.info(e)
         return "未知错误，请联系hamburger"
-    # finally:
-    #     logging.info("ip:%s, use key:%s, messages:%s", ip, openai.api_key, str(messages))
 
 
 # 定义一个路由，用于微信小程序请求
