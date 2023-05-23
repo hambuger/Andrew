@@ -150,8 +150,8 @@ def hangpt():
         def stream_response():
             global botMsgText, botMsgId
             for chunk in response:
-                botMsgText = botMsgText + response['choices'][0]['message']['content']
-                botMsgId = response['choices'][0]['message']['id']
+                botMsgText = botMsgText + chunk['choices'][0]['message']['content']
+                botMsgId = chunk['choices'][0]['message']['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
         if stream:
