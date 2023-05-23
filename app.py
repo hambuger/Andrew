@@ -141,7 +141,7 @@ def hangpt():
         for d in messages:
             d.pop("id", None)
         # 持久化对话信息
-        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
+        # insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -161,12 +161,9 @@ def hangpt():
     except Exception as e:
         logging.info(e)
         return "未知错误，请联系hamburger"
-    #finally:
-        # if (botMsgText != ''):
-        #     try:
-        #         insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
-        #     except Exception as e:
-        #         logging.info(e)
+    finally:
+        if (botMsgText != ''):
+            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
 
 
 
