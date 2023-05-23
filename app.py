@@ -151,20 +151,13 @@ def hangpt():
         )
         def stream_response():
             for chunk in response:
-                content = chunk['choices'][0]['delta'].get('content', '')
-                all_contents.append(content)
-                botMsgId = chunk['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
-        # # 列表推导式，解析JSON字符串并提取"text"字段的值
-        # text_list = [json.loads(data.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '') for data in stream_response() if 'content' in data]
-        #
-        # # 将text_list中的所有字符串拼接成一个大字符串
-        # text_combined = ''.join(text_list)
-        #
-        # logging.info("text_combined: {}".format(text_combined))
-
         if stream:
+            streamResponse = stream_response()
+            content = json.loads(streamResponse.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
+            all_contents.append(content)
+            messageId = json.loads(streamResponse.split("data: ", 1)[1])['id']
             return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
