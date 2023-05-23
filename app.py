@@ -130,7 +130,7 @@ def hangpt():
     messages = request.json.get('messages')
     botMsgText = ''
     botMsgId = ''
-    logging.info("messages:{}", messages)
+    logging.info("messages: {}".format(messages))
     messageId = messages[-1].get("id")
     try:
         # stream为空则为false
