@@ -128,20 +128,21 @@ def generateNewContent(content, content_vector, creator):
     try:
         response = query_vector_to_string(content_vector, creator)
         content_list = []
+        node_id_list = []
         for i, hit in enumerate(response['hits']['hits']):
             # 将其按照需要的格式添加到列表中
-            node_id_list = [hit['_source'].get('content_node_id', ''), hit['_source'].get('parent_id', '')]
-            nodeResponse = query_node_id_to_string(node_id_list, creator)
-            for j, hit2 in enumerate(nodeResponse['hits']['hits']):
-                generated_content2 = hit2['_source'].get('generated_content', '')
-                creator2 = hit2['_source'].get('content_creator', '')
-                content_list.append(creator2 + ":" + generated_content2 + "\n")
-            content_list.append(f"{i + 1}:{content_list}")
+            node_id_list.append(hit['_source'].get('content_node_id', ''))
+            node_id_list.append(hit['_source'].get('parent_id', ''))
+        nodeResponse = query_node_id_to_string(node_id_list, creator)
+        for j, hit2 in enumerate(nodeResponse['hits']['hits']):
+            generated_content2 = hit2['_source'].get('generated_content', '')
+            creator2 = hit2['_source'].get('content_creator', '')
+            creatorTime = hit2['_source'].get('content_creation_time', '')
+            content_list.append("(" + creatorTime + ") " + creator2 + ":" + generated_content2)
+        result = ""
+        for i, contentStr in enumerate(content_list):
+            result = result + f"{i + 1}:{contentStr}" + "\n"
 
-        #找出所有相关的节点记录
-
-        # 使用 join 方法拼接所有的 generated_content
-        result = "；\n".join(content_list)
         result = "  MEMORIES sorted in relevance:\n" + result + "\n" \
                  + "Based on chat message history and memories, respond to the query:" + "\"" + content + "\""
         return result
