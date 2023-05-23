@@ -61,15 +61,7 @@ def query_vector_to_string(query_vector, content_owner):
             }
         }
     }
-    # 执行查询
-    query2 = {
-        'query': {
-            'match_all': {
-
-            }
-        }
-    }
-    return es.search(index="lang_chat_content", body=query2)
+    return es.search(index="lang_chat_content", body=query_body)
 
 
 # 插入文档
