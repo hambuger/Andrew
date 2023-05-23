@@ -98,6 +98,7 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
 
         return res
     except Exception as e:
+        logging.info("insert_document error")
         logging.info(e)
     finally:
         logging.info("insert_document finished")
