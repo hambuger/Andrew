@@ -18,7 +18,7 @@ app.secret_key = 'some_secret_key'
 logging.basicConfig(
     filename='app.log',
     level=logging.INFO,
-    format='%(asctime)s %(message)s',
+    format='%(asctime)s [Line: %(lineno)d]: %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p'
 )
 
