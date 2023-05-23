@@ -172,7 +172,9 @@ def hangpt():
             logging.info("messageId:{}".format(messageId))
             logging.info("client_ip:{}".format(client_ip))
             logging.info("all_contents:{}".format(''.join(all_contents)))
-            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', ''.join(all_contents), 0.5)
+            embedding = openai.Embedding.create(input=[''.join(all_contents)], model="text-embedding-ada-002")
+            content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
+            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', ''.join(all_contents), 0.5, content_vector)
 
 
 
