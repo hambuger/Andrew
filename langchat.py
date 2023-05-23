@@ -3,6 +3,7 @@ import numpy as np
 import openai
 from elasticsearch import Elasticsearch
 import logging
+from keycache import ApiKeyManager
 
 # 保存日志
 logging.basicConfig(
@@ -15,7 +16,7 @@ logging.basicConfig(
 # 实例化 Elasticsearch 客户端
 es = Elasticsearch(hosts=["http://localhost:9200"])
 
-
+api_key_manager = ApiKeyManager()
 #  查询相关的文本内容
 def query_vector_to_string(query_vector, content_owner):
     # 定义查询
@@ -71,6 +72,7 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
     # 使用OpenAI的embedding生成向量
     logging.info("insert_document start")
     try:
+        openai.api_key = api_key_manager.get_key()
         embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
         content_vector = np.array(embedding.result).tolist()
 
