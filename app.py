@@ -158,6 +158,7 @@ def hangpt():
     all_contents = []
     botMsgId = ''
     logging.info("messages: {}".format(messages))
+    logging.info("request: {}".format(request))
     messageId = messages[-1].get("id")
     try:
         # stream为空则为false
