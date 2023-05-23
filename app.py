@@ -124,7 +124,7 @@ def input():
 # 定义一个路由，用于微信小程序请求和网页聊天请求
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
-    #logging.info("request:" + json.dumps(request.json))
+    logging.info("request:" + json.dumps(request))
     responseStr = None
     ip = request.remote_addr
     # 获取body中的字段messages
