@@ -2,7 +2,6 @@
 from flask import Flask, render_template, request, session, Response
 # 导入openai模块
 import openai
-from openai import OpenAIError
 import sys
 import time
 # 导入logging模块
@@ -127,7 +126,6 @@ def input():
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
-    logging.info('Client IP is: {}'.format(client_ip))
     # 获取body中的字段messages
     messages = request.json.get('messages')
     all_contents = []
@@ -143,9 +141,7 @@ def hangpt():
         for d in messages:
             d.pop("id", None)
         # 持久化对话信息
-        logging.info("message content:{}".format(content))
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
-        logging.info("embedding:{}".format(embedding))
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
         insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
@@ -153,7 +149,6 @@ def hangpt():
             messages=messages,
             stream=stream
         )
-        logging.info("openai get response")
         def stream_response():
             for chunk in response:
                 content = chunk['choices'][0]['delta'].get('content', '')
@@ -165,10 +160,10 @@ def hangpt():
             return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
-    except OpenAIError as e:
-        logging.info("error:{}", e._message)
+    except Exception:
         return "未知错误，请联系hamburger"
     finally:
+        logging.info("all_contents:{}".format(all_contents))
         if (all_contents):
             insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', all_contents, 0.5)
 

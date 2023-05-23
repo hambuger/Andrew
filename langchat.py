@@ -68,7 +68,6 @@ def query_vector_to_string(query_vector, content_owner):
 # 插入文档
 def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance, content_vector):
     # 使用OpenAI的embedding生成向量
-    logging.info("insert_document start")
     try:
         # 获取当前时间
         current_time = datetime.now()
@@ -94,7 +93,4 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
 
         return res
     except Exception as e:
-        logging.info("insert_document error")
         logging.info(e)
-    finally:
-        logging.info("insert_document finished")
