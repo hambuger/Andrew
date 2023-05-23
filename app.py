@@ -144,7 +144,7 @@ def hangpt():
         # 持久化对话信息
         logging.info("message content:{}".format(content))
         embedding = openai.Embedding.create(input=content, model="text-embedding-ada-002")
-        logging.info("embedding.result:{}", embedding.result)
+        # logging.info("embedding.result:{}", embedding.result)
         content_vector = np.array(embedding.result).tolist()
         insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
