@@ -60,7 +60,7 @@ def query_vector_to_string(query_vector, content_owner):
 # 插入文档
 def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance):
     # 使用OpenAI的embedding生成向量
-    embedding = openai.Embedding.create(content=content)
+    embedding = openai.Embedding.create(content=content, model="text-embedding-ada-002")
     content_vector = np.array(embedding.result).tolist()
 
     # 获取当前时间
