@@ -144,7 +144,8 @@ def generateNewContent(content, content_vector, creator):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
         result = "  MEMORIES sorted in relevance:\n" + result + "\n" \
-                 + "Based on chat message history and memories, respond to the query:" + "\"" + content + "\""
+                 + "Based on chat message history and memories, respond to the query:" + "\"" + content + \
+                 "\".\nYou don't have to refer to them if they aren't useful."
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
