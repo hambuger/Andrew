@@ -1,8 +1,7 @@
-from elasticsearch import Elasticsearch
 from datetime import datetime
-from pysnowflake import IdWorker
-from openai import OpenAI, Completion
 import numpy as np
+import openai
+from elasticsearch import Elasticsearch
 
 # 实例化 Elasticsearch 客户端
 es = Elasticsearch(hosts=["localhost:9200"])
@@ -58,18 +57,11 @@ def query_vector_to_string(query_vector, content_owner):
     return es.search(index="lang_chat_content", body=query_body)
 
 
-# 初始化一个雪花算法ID生成器
-id_worker = IdWorker(1, 2, 0)
-
-
 # 插入文档
-def insert_document(parent_id, creator_ip, content_owner, creator, content, importance, generated_content):
+def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance):
     # 使用OpenAI的embedding生成向量
     embedding = openai.Embedding.create(content=content)
     content_vector = np.array(embedding.result).tolist()
-
-    # 使用雪花算法生成ID
-    content_node_id = id_worker.get_id()
 
     # 获取当前时间
     current_time = datetime.now()
@@ -81,7 +73,7 @@ def insert_document(parent_id, creator_ip, content_owner, creator, content, impo
         "content_creator": creator,  # 这里假设内容创建者为"creator"，你可以根据需要进行修改
         "content_creation_time": current_time,
         "content_last_access_time": current_time,
-        "generated_content": generated_content,
+        "generated_content": content,
         "content_importance": importance,
         "content_type": 1,
         "content_vector": content_vector,
@@ -89,8 +81,8 @@ def insert_document(parent_id, creator_ip, content_owner, creator, content, impo
         "creator_ip": creator_ip,
         "parent_id": parent_id
     }
-
+    docId = content_owner + "_" + content_node_id
     # 插入文档
-    res = es.index(index="lang_chat_content", body=doc)
+    res = es.index(index="lang_chat_content", body=doc, id=docId)
 
     return res

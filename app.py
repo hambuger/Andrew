@@ -7,7 +7,7 @@ import time
 # 导入logging模块
 import logging
 import json
-# from langchat import query_vector_to_string, insert_document
+from langchat import query_vector_to_string, insert_document
 from keycache import ApiKeyManager
 
 # 创建一个flask应用
@@ -128,21 +128,30 @@ def hangpt():
     logging.info('Client IP is: {}'.format(client_ip))
     # 获取body中的字段messages
     messages = request.json.get('messages')
+    botMsgText = ''
+    botMsgId = ''
+    logging.info("messages:{}", messages)
+    messageId = messages[-1].get("id")
     try:
         # stream为空则为false
         stream = request.json.get('stream') or False
         openai.api_key = get_valid_openai_key()
-        logging.info("messages:{}", messages)
+        parentId = messages[-2].get("id")
+        content = messages[-1].get("content")
         for d in messages:
             d.pop("id", None)
+        # 持久化对话信息
+        insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
             stream=stream
         )
-
         def stream_response():
+            global botMsgText, botMsgId
             for chunk in response:
+                botMsgText = botMsgText + response['choices'][0]['message']['content']
+                botMsgId = response['choices'][0]['message']['id']
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
 
         if stream:
@@ -152,6 +161,10 @@ def hangpt():
     except Exception as e:
         logging.info(e)
         return "未知错误，请联系hamburger"
+    finally:
+        if (botMsgText != ''):
+            insert_document(botMsgId, messageId, client_ip, 'hamburger', 'gpt-3.5', botMsgText, 0.5)
+
 
 
 # 定义一个路由，用于微信小程序请求
