@@ -123,6 +123,21 @@ def input():
 
 
 # 定义一个路由，用于微信小程序请求和网页聊天请求
+def generateNewContent(content, content_vector, creator):
+    response = query_vector_to_string(content_vector, creator)
+    content_list = []
+    for i, hit in enumerate(response['hits']['hits']):
+        # 获取文档的 generated_content 字段
+        generated_content = hit['_source'].get('generated_content', '')
+
+        # 将其按照需要的格式添加到列表中
+        content_list.append(f"{i + 1}:{generated_content}")
+
+    # 使用 join 方法拼接所有的 generated_content
+    result = "；\n".join(content_list)
+    logging.info("result: {}".format(result))
+    return result
+
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
@@ -143,6 +158,7 @@ def hangpt():
         # 持久化对话信息
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
+        gpt_content = generateNewContent(content, content_vector, "hamburger")
         insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
