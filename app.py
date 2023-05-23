@@ -127,6 +127,8 @@ def hangpt():
     logging.info("request ip:" + json.dumps(request.remote_addr))
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
     logging.info('Client IP is: {}'.format(client_ip))
+    client_ip2 = request.headers.get('X-Real-IP')
+    logging.info('Client IP2 is: {}'.format(client_ip2))
     responseStr = None
     ip = request.remote_addr
     # 获取body中的字段messages
