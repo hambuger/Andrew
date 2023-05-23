@@ -7,7 +7,7 @@ import time
 # 导入logging模块
 import logging
 import json
-from langchat import query_vector_to_string, insert_document
+from langchat import query_vector_to_string, insert_document, query_node_id_to_string
 from keycache import ApiKeyManager
 import numpy as np
 
@@ -123,20 +123,27 @@ def input():
 
 
 # 定义一个路由，用于微信小程序请求和网页聊天请求
+
 def generateNewContent(content, content_vector, creator):
     try:
         response = query_vector_to_string(content_vector, creator)
         content_list = []
         for i, hit in enumerate(response['hits']['hits']):
-            # 获取文档的 generated_content 字段
-            generated_content = hit['_source'].get('generated_content', '')
-
             # 将其按照需要的格式添加到列表中
-            content_list.append(f"{i + 1}:{generated_content}")
+            node_id_list = [hit['_source'].get('content_node_id', ''), hit['_source'].get('parent_id', '')]
+            nodeResponse = query_node_id_to_string(node_id_list, creator)
+            for j, hit2 in enumerate(nodeResponse['hits']['hits']):
+                generated_content2 = hit2['_source'].get('generated_content', '')
+                creator2 = hit2['_source'].get('content_creator', '')
+                content_list.append(creator2 + ":" + generated_content2 + "\n")
+            content_list.append(f"{i + 1}:{content_list}")
+
+        #找出所有相关的节点记录
 
         # 使用 join 方法拼接所有的 generated_content
         result = "；\n".join(content_list)
-        logging.info("result: {}".format(result))
+        result = "  MEMORIES sorted in relevance:\n" + result + "\n" \
+                 + "Based on chat message history and memories, respond to the query:" + "\"" + content + "\""
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
@@ -162,6 +169,7 @@ def hangpt():
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
         gpt_content = generateNewContent(content, content_vector, "hamburger")
+        logging.info("gpt_content: {}".format(gpt_content))
         insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",

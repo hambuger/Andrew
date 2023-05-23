@@ -15,11 +15,32 @@ logging.basicConfig(
 es = Elasticsearch(hosts=["http://localhost:9200"])
 
 api_key_manager = ApiKeyManager()
+
+
+def query_node_id_to_string(node_id_list, creator):
+    query_body = {
+        "query": {
+            "bool": {
+                "should": [
+                    {"terms": {"parent_id": node_id_list}},
+                    {"terms": {"content_node_id": node_id_list}}
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "sort": [
+            {"content_creation_time": {"order": "asc"}}
+        ]
+    }
+
+    return es.search(index="lang_chat_content", body=query_body)
+
+
 #  查询相关的文本内容
 def query_vector_to_string(query_vector, content_owner):
     # 定义查询
     query_body = {
-        "size": 5,
+        "size": 3,
         "query": {
             "function_score": {
                 "query": {
