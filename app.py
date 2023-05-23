@@ -161,7 +161,8 @@ def hangpt():
             return Response(streamResponse, mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
-    except Exception:
+    except Exception as e:
+        logging.error("error: {}".format(e))
         return "未知错误，请联系hamburger"
     finally:
         logging.info("all_contents:{}".format(all_contents))
