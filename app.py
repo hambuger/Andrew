@@ -171,6 +171,7 @@ def hangpt():
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
         gpt_content = generateNewContent(content, content_vector, "hamburger")
         logging.info("gpt_content: {}".format(gpt_content))
+        messages[-1]['content'] = gpt_content
         insert_document(messageId, parentId, client_ip, 'hamburger', 'hamburger', content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
