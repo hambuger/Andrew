@@ -158,7 +158,7 @@ def hangpt():
             content = json.loads(streamResponse.split("data: ", 1)[1])['choices'][0]['delta'].get('content', '')
             all_contents.append(content)
             messageId = json.loads(streamResponse.split("data: ", 1)[1])['id']
-            return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
+            return Response(streamResponse, mimetype='application/octet-stream', content_type='application/json')
         else:
             return response
     except Exception:
