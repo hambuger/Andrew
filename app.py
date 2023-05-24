@@ -161,6 +161,7 @@ def hangpt():
     logging.info("messages: {}".format(messages))
     userName = request.json.get('user_name') or 'default'
     messageId = messages[-1].get("id")
+    ip = request.json.get('ip')
     try:
         # stream为空则为false
         stream = request.json.get('stream') or False
@@ -175,7 +176,7 @@ def hangpt():
         gpt_content = generateNewContent(content, content_vector, userName)
         logging.info("gpt_content: {}".format(gpt_content))
         messages[-1]['content'] = gpt_content
-        insert_document(messageId, parentId, client_ip, userName, userName, content, 0.5, content_vector)
+        insert_document(messageId, parentId, ip or client_ip, userName, userName, content, 0.5, content_vector)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -190,7 +191,7 @@ def hangpt():
                 yield 'data: ' + json.dumps(chunk) + '\n\n'
             embedding = openai.Embedding.create(input=[''.join(all_contents)], model="text-embedding-ada-002")
             content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-            insert_document(botMsgId, messageId, client_ip, userName, 'gpt-3.5', ''.join(all_contents), 0.5,
+            insert_document(botMsgId, messageId, ip or client_ip, userName, 'gpt-3.5', ''.join(all_contents), 0.5,
                             content_vector)
 
         if stream:
