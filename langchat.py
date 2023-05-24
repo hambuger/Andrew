@@ -37,56 +37,106 @@ def query_node_id_to_string(node_id_list, creator):
 
 
 #  查询相关的文本内容
-def query_vector_to_string(query_vector, content_owner):
-    # 定义查询
-    query_body = {
-        "size": 3,
-        "query": {
-            "function_score": {
-                "query": {
-                    "match": {
-                        "content_owner": content_owner
-                    }
-                },
-                "score_mode": "sum",
-                "boost_mode": "replace",
-                "functions": [
-                    {
-                        "filter": {"match_all": {}},
-                        "exp": {
-                            "content_last_access_time": {
-                                "scale": "10m",
-                                "decay": 0.99
+def query_vector_to_string(query_vector, content_owner, ip):
+    query_body = None
+    if content_owner and content_owner != "default":
+        # 定义查询
+        query_body = {
+            "size": 3,
+            "query": {
+                "function_score": {
+                    "query": {
+                        "match": {
+                            "content_owner": content_owner
+                        }
+                    },
+                    "score_mode": "sum",
+                    "boost_mode": "replace",
+                    "functions": [
+                        {
+                            "filter": {"match_all": {}},
+                            "exp": {
+                                "content_last_access_time": {
+                                    "scale": "10m",
+                                    "decay": 0.99
+                                }
                             }
-                        }
-                    },
-                    {
-                        "filter": {"match_all": {}},
-                        "field_value_factor": {
-                            "field": "content_importance",
-                            "missing": 0
-                        }
-                    },
-                    {
-                        "filter": {"match_all": {}},
-                        "script_score": {
-                            "script": {
-                                "source": "cosineSimilarity(params.query_vector, 'content_vector') + 1.0",
-                                "params": {
-                                    "query_vector": query_vector
+                        },
+                        {
+                            "filter": {"match_all": {}},
+                            "field_value_factor": {
+                                "field": "content_importance",
+                                "missing": 0
+                            }
+                        },
+                        {
+                            "filter": {"match_all": {}},
+                            "script_score": {
+                                "script": {
+                                    "source": "cosineSimilarity(params.query_vector, 'content_vector') + 1.0",
+                                    "params": {
+                                        "query_vector": query_vector
+                                    }
                                 }
                             }
                         }
-                    }
-                ]
+                    ]
+                }
             }
         }
-    }
+    elif ip:
+        query_body = {
+            "size": 3,
+            "query": {
+                "function_score": {
+                    "query": {
+                        "match": {
+                            "creator_ip": ip
+                        }
+                    },
+                    "score_mode": "sum",
+                    "boost_mode": "replace",
+                    "functions": [
+                        {
+                            "filter": {"match_all": {}},
+                            "exp": {
+                                "content_last_access_time": {
+                                    "scale": "10m",
+                                    "decay": 0.99
+                                }
+                            }
+                        },
+                        {
+                            "filter": {"match_all": {}},
+                            "field_value_factor": {
+                                "field": "content_importance",
+                                "missing": 0
+                            }
+                        },
+                        {
+                            "filter": {"match_all": {}},
+                            "script_score": {
+                                "script": {
+                                    "source": "cosineSimilarity(params.query_vector, 'content_vector') + 1.0",
+                                    "params": {
+                                        "query_vector": query_vector
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    else:
+        logging.warn("query_vector_to_string: content_owner and ip are both None")
+        return None
     return es.search(index="lang_chat_content", body=query_body)
 
 
 # 插入文档
-def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance, content_vector):
+def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
+                    content_vector):
     # 使用OpenAI的embedding生成向量
     try:
         # 获取当前时间
