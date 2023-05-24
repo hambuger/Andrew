@@ -124,10 +124,10 @@ def input():
 
 # 定义一个路由，用于微信小程序请求和网页聊天请求
 
-def generateNewContent(content, content_vector, creator):
+def generateNewContent(content, content_vector, creator, ip):
     try:
-        response = query_vector_to_string(content_vector, creator)
-        if response['hits']['total']['value'] == 0:
+        response = query_vector_to_string(content_vector, creator, ip)
+        if response and response['hits']['total']['value'] == 0:
             return content
         content_list = []
         node_id_list = []
@@ -173,7 +173,7 @@ def hangpt():
         # 持久化对话信息
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-        gpt_content = generateNewContent(content, content_vector, userName)
+        gpt_content = generateNewContent(content, content_vector, userName, ip or client_ip)
         logging.info("gpt_content: {}".format(gpt_content))
         messages[-1]['content'] = gpt_content
         insert_document(messageId, parentId, ip or client_ip, userName, userName, content, 0.5, content_vector)
