@@ -146,7 +146,7 @@ def generateNewContent(content, content_vector, creator):
         for i, contentStr in enumerate(content_list):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
-        result = "MEMORIES sorted in relevance:\n" + result + "\nBased on chat message history and memories(If they are useless, you cannot mention them), respond to this message.\n" + "\"" + content + "\""
+        result = "MEMORIES sorted in relevance:\n" + result + "\nBased on chat message history and memories(Don't reply that I have provided information, whether it is useful or not), respond to this message.\n" + "\"" + content + "\""
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
