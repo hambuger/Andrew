@@ -135,6 +135,7 @@ def generateNewContent(content, content_vector, creator):
             # 将其按照需要的格式添加到列表中
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
+        node_id_list = list(filter(None, node_id_list))
         nodeResponse = query_node_id_to_string(node_id_list, creator)
         for j, hit2 in enumerate(nodeResponse['hits']['hits']):
             generated_content2 = hit2['_source'].get('generated_content', '')
