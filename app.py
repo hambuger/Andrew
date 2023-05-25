@@ -124,6 +124,14 @@ def input():
 
 # 定义一个路由，用于微信小程序请求和网页聊天请求
 
+def generateChagGPTPrompt(content, result):
+    prompt = f"The chat records that appear between the first ```` and last ```` are from the past. \n \
+                ````{result}````\n \
+                Do not reveal in your reply that I have provided the above information.\n \
+                Based on chat history and memories, respond to the message between first <<< and last >>>.\n \
+                <<<{content}>>>"
+    return prompt
+
 def generateNewContent(content, content_vector, creator, ip):
     try:
         response = query_vector_to_string(content_vector, creator, ip)
@@ -146,7 +154,7 @@ def generateNewContent(content, content_vector, creator, ip):
         for i, contentStr in enumerate(content_list):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
-        result = "MEMORIES sorted in relevance:\n" + result + "\nDo not reveal in your reply that I have provided the above information.\nRespond to the message.\n```"+content+"```"
+        result = generateChagGPTPrompt(content, result)
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
