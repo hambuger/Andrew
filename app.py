@@ -126,10 +126,10 @@ def input():
 
 def generateChagGPTPrompt(content, result):
     prompt = f"The chat records that appear between the first ```` and last ```` are from the past. \n \
-                ````{result}````\n \
-                Do not reveal in your reply that I have provided the above information.\n \
-                Based on chat history and memories, respond to the message between first <<< and last >>>.\n \
-                <<<{content}>>>"
+````{result}````\n \
+Do not reveal in your reply that I have provided the above information.\n \
+Based on chat history and memories, respond to the message between first <<< and last >>>.\n \
+<<<{content}>>>"
     return prompt
 
 def generateNewContent(content, content_vector, creator, ip):
