@@ -146,7 +146,7 @@ def generateNewContent(content, content_vector, creator, ip):
         for i, contentStr in enumerate(content_list):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
-        result = "MEMORIES sorted in relevance:\n" + result + "\nBased on chat history and memories, respond to the message.\nDo not reveal in your reply that I have provided the above information.\n```" + content + "```"
+        result = "MEMORIES sorted in relevance:\n" + result + "\nDo not reveal in your reply that I have provided the above information.\nRespond to the message.\n```"+content+"```"
         return result
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
