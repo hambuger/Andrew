@@ -36,33 +36,33 @@ def query_data_by_id(id, parent_id):
 
 
 # 插入示例
-document = {
-    'title': 'My Title',
-    'content': 'My Content',
-    'creation_time': '2023-05-27 12:00:00',
-    'modification_time': '2023-05-27 12:00:00',
-    'is_deleted': 'false',
-    'type': 'My Type',
-    'node_id': 1,
-    'parent_node_id': 0
-}
-insert_data('blog',1, document)
+# document = {
+#     'title': 'My Title',
+#     'content': 'My Content',
+#     'creation_time': '2023-05-27 12:00:00',
+#     'modification_time': '2023-05-27 12:00:00',
+#     'is_deleted': 'false',
+#     'type': 'My Type',
+#     'node_id': 1,
+#     'parent_node_id': 0
+# }
+# insert_data('blog',1, document)
 
-# 更新示例
-update_document = {'content': 'Updated Content'}
-update_data('blog', 1, update_document)
+# # 更新示例
+# update_document = {'content': 'Updated Content'}
+# update_data('blog', 1, update_document)
 
 # 查询示例
-query = {
-    'query': {
-        'bool': {
-            'should': [
-                {'match': {'title': 'My Title'}},
-                {'match': {'content': 'My Content'}},
-                {'term': {'node_id': 1}}
-            ]
-        }
-    }
-}
-results = query_data('blog', query)
-print(results)
+# query = {
+#     'query': {
+#         'bool': {
+#             'should': [
+#                 {'match': {'title': 'My Title'}},
+#                 {'match': {'content': 'My Content'}},
+#                 {'term': {'node_id': 1}}
+#             ]
+#         }
+#     }
+# }
+# results = query_data('blog', query)
+# print(results)
