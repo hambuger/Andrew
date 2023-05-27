@@ -226,7 +226,7 @@ def model():
 @app.route('/blog/query', methods=['GET'])
 def blog():
     id = request.args.get('id')
-    parent_id = request.args.get('parent_id')
+    parent_id = request.args.get('parentId')
     response = query_data_by_id(id, parent_id)
     logging.info(response)
     if not response:
@@ -237,7 +237,7 @@ def blog():
             content = response['_source'].get('content', '')
             node_id = response['_source'].get('node_id', '')
             type = response['_source'].get('type', '')
-            return {"title": title, "content": content, "node_id": node_id, "type": type}
+            return {"title": title, "content": content, "id": node_id, "type": type}
         else:
             return None
     if response and response['hits']['total']['value'] == 0:
@@ -248,5 +248,5 @@ def blog():
         content = hit['_source'].get('content', '')
         node_id = hit['_source'].get('node_id', '')
         type = hit['_source'].get('type', '')
-        result.append({"title": title, "content": content, "node_id": node_id, "type": type})
+        result.append({"title": title, "content": content, "id": node_id, "type": type})
     return result
