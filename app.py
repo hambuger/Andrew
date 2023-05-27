@@ -228,6 +228,7 @@ def blog():
     id = request.args.get('id')
     parent_id = request.args.get('parent_id')
     response = query_data_by_id(id, parent_id)
+    logging.info(response)
     if response and response['hits']['total']['value'] == 0:
         return None
     result = []
