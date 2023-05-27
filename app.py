@@ -243,7 +243,7 @@ def blog():
     if response and response['hits']['total']['value'] == 0:
         return None
     result = []
-    for hit in enumerate(response['hits']['hits']):
+    for index, hit in enumerate(response['hits']['hits']):˚
         title = hit['_source'].get('title', '')
         content = hit['_source'].get('content', '')
         node_id = hit['_source'].get('node_id', '')
