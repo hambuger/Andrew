@@ -20,7 +20,7 @@ def query_data(index_name, query):
 
 def query_data_by_id(id, parent_id):
     if id:
-        return es.search(index="blog", id=id)
+        return es.get(index="blog", id=id)
     else:
         query = {
             'query': {
