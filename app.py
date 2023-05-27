@@ -240,9 +240,9 @@ def blog():
             return {"title": title, "content": content, "id": node_id, "type": type}
         else:
             return None
-    if response and response['hits']['total']['value'] == 0:
-        return None
     result = []
+    if response and response['hits']['total']['value'] == 0:
+        return result
     for index, hit in enumerate(response['hits']['hits']):
         title = hit['_source'].get('title', '')
         content = hit['_source'].get('content', '')
