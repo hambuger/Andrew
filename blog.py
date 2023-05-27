@@ -29,7 +29,10 @@ def query_data_by_id(id, parent_id):
                         {'match': {'parent_node_id': parent_id}}
                     ]
                 }
-            }
+            },
+            'sort': [
+                {'creation_time': {'order': 'desc'}}
+            ]
         }
         res = es.search(index="blog", body=query)
         return res
