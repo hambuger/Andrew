@@ -10,6 +10,7 @@ import json
 from langchat import query_vector_to_string, insert_document, query_node_id_to_string
 from keycache import ApiKeyManager
 import numpy as np
+from blog import query_data_by_id
 
 # 创建一个flask应用
 app = Flask(__name__)
@@ -221,3 +222,21 @@ def model():
     except openai.error.RateLimitError as e:
         logging.info(e)
         return e
+
+@app.route('/blog/query', methods=['GET'])
+def model():
+    id = request.args.get('id')
+    parent_id = request.args.get('parent_id')
+    response = query_data_by_id(id, parent_id)
+    if response and response['hits']['total']['value'] == 0:
+        return None
+    result = []
+    for hit in enumerate(response['hits']['hits']):
+        title = hit['_source'].get('title', '')
+        content = hit['_source'].get('content', '')
+        node_id = hit['_source'].get('node_id', '')
+        type = hit['_source'].get('type', '')
+        if id:
+            return {"title": title, "content": content, "node_id": node_id, "type": type}
+        result.append({"title": title, "content": content, "node_id": node_id, "type": type})
+    return result
