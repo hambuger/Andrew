@@ -224,7 +224,7 @@ def model():
         return e
 
 @app.route('/blog/query', methods=['GET'])
-def model():
+def blog():
     id = request.args.get('id')
     parent_id = request.args.get('parent_id')
     response = query_data_by_id(id, parent_id)
