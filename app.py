@@ -250,3 +250,20 @@ def blog():
         type = hit['_source'].get('type', '')
         result.append({"title": title, "content": content, "id": node_id, "type": type})
     return result
+
+
+@app.route('/upload/image', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return 'No image file found', 400
+
+    image_file = request.files['image']
+    if image_file.filename == '':
+        return 'Invalid image file', 400
+
+    # 保存图片到服务器指定的位置
+    save_path = '/var/www/picture'  # 替换为你希望保存图片的目录路径
+    image_file.save(save_path)
+
+    # 返回上传成功的响应
+    return {'message': 'Image uploaded successfully', 'url': '/picture'}
