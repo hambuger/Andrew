@@ -9,6 +9,7 @@ import time
 # 导入logging模块
 import logging
 import json
+import uuid
 
 from werkzeug.utils import secure_filename
 
@@ -266,7 +267,7 @@ def upload_image():
     if image_file.filename == '':
         return 'Invalid image file', 400
     save_directory = '/var/www/picture'
-    filename = secure_filename(image_file.filename)
+    filename = str(uuid.uuid4()) + '.jpg'
     save_path = os.path.join(save_directory, filename)
     image_file.save(save_path)
 
