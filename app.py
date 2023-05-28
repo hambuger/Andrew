@@ -1,4 +1,6 @@
 # 导入flask模块
+import os
+
 from flask import Flask, render_template, request, session, Response
 # 导入openai模块
 import openai
@@ -7,6 +9,9 @@ import time
 # 导入logging模块
 import logging
 import json
+
+from werkzeug.utils import secure_filename
+
 from langchat import query_vector_to_string, insert_document, query_node_id_to_string
 from keycache import ApiKeyManager
 import numpy as np
@@ -260,10 +265,11 @@ def upload_image():
     image_file = request.files['image']
     if image_file.filename == '':
         return 'Invalid image file', 400
-
-    # 保存图片到服务器指定的位置
-    save_path = '/var/www/picture'  # 替换为你希望保存图片的目录路径
+    save_directory = '/var/www/picture'
+    filename = secure_filename(image_file.filename)
+    save_path = os.path.join(save_directory, filename)
     image_file.save(save_path)
 
-    # 返回上传成功的响应
-    return {'message': 'Image uploaded successfully', 'url': '/picture'}
+    # 返回上传成功的响应，包含保存的图片路径
+    image_url = '/picture/' + filename  # 替换为你的图片访问路径
+    return {'message': 'Image uploaded successfully', 'url': image_url}
