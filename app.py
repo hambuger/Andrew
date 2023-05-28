@@ -10,8 +10,7 @@ import time
 import logging
 import json
 import hashlib
-
-from werkzeug.utils import secure_filename
+import tiktoken
 
 from langchat import query_vector_to_string, insert_document, query_node_id_to_string
 from keycache import ApiKeyManager
@@ -32,6 +31,8 @@ logging.basicConfig(
 
 # 初始化redis，保存keys
 api_key_manager = ApiKeyManager()
+
+encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
 
 # 定义一个函数，用于获取一个有效的openai的密钥
@@ -139,6 +140,45 @@ Based on chat history and memories, respond to the message between first <<< and
 <<<{content}>>>"
     return prompt
 
+
+def sumMessageToken(newMessages):
+    tokens = 0
+    for message in newMessages:
+        tokens = tokens + len(encoding.encode(message["role"] + message["content"]))
+    return tokens
+
+
+def generateNewMessages(content_vector, creator, ip, messages):
+    try:
+        response = query_vector_to_string(content_vector, creator, ip)
+        if response and response['hits']['total']['value'] == 0:
+            return messages
+        newMessages = messages[-2:]
+        tokenNum = sumMessageToken(newMessages)
+        if tokenNum > 4096:
+            return newMessages[:-1]
+        for i, hit in enumerate(response['hits']['hits']):
+            # 将其按照需要的格式添加到列表中
+            user = 'assistant' if hit['_source'].get('content_creator', '') == 'gpt-3.5' else 'user'
+            tokenNum = tokenNum + len(encoding.encode(user + hit['_source'].get('generated_content', '')))
+            if tokenNum > 4096:
+                return newMessages
+            newMessages.insert(0, {'role': user, 'content': hit['_source'].get('generated_content', '')})
+        otherMessages = messages[:-2]
+        y = 3
+        for message in otherMessages[::-1]:
+            tokenNum = tokenNum + len(encoding.encode(message["role"] + message["content"]))
+            if tokenNum > 4096:
+                return newMessages
+            newMessages.insert(-y, message)
+            y = y + 1
+        return newMessages
+
+    except Exception as e:
+        logging.info("generateNewMessages error: {}".format(e))
+        return messages
+
+
 def generateNewContent(content, content_vector, creator, ip):
     try:
         response = query_vector_to_string(content_vector, creator, ip)
@@ -188,10 +228,11 @@ def hangpt():
         # 持久化对话信息
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-        gpt_content = generateNewContent(content, content_vector, userName, ip or client_ip)
-        logging.info("gpt_content: {}".format(gpt_content))
-        messages[-1]['content'] = gpt_content
+        messages = generateNewMessages(content_vector, userName, ip or client_ip, messages)
+        # logging.info("gpt_content: {}".format(gpt_content))
+        # messages[-1]['content'] = gpt_content
         insert_document(messageId, parentId, ip or client_ip, userName, userName, content, 0.5, content_vector)
+        logging.info("messages: {}".format(messages))
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,

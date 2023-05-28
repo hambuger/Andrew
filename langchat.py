@@ -82,7 +82,10 @@ def query_vector_to_string(query_vector, content_owner, ip):
                         }
                     ]
                 }
-            }
+            },
+            "sort": [
+                {"content_creation_time": {"order": "desc"}}
+            ]
         }
     elif ip:
         query_body = {
@@ -126,7 +129,10 @@ def query_vector_to_string(query_vector, content_owner, ip):
                         }
                     ]
                 }
-            }
+            },
+            "sort": [
+                {"content_creation_time": {"order": "desc"}}
+            ]
         }
     else:
         logging.warn("query_vector_to_string: content_owner and ip are both None")
