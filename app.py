@@ -9,7 +9,7 @@ import time
 # 导入logging模块
 import logging
 import json
-import uuid
+import hashlib
 
 from werkzeug.utils import secure_filename
 
@@ -267,7 +267,11 @@ def upload_image():
     if image_file.filename == '':
         return 'Invalid image file', 400
     save_directory = '/var/www/picture'
-    filename = str(uuid.uuid4()) + '.jpg'
+    # 使用 MD5 哈希函数生成唯一的字符串
+    hash_object = hashlib.md5(image_file.filename.encode())
+    hex_dig = hash_object.hexdigest()
+    # 将哈希结果作为文件名
+    filename = hex_dig + '.jpg'
     save_path = os.path.join(save_directory, filename)
     image_file.save(save_path)
 
