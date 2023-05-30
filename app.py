@@ -107,7 +107,7 @@ def hgchat():
         )
         return response
     except Exception as e:
-        print("RateLimitError"+str(e))
+        logging.info("RateLimitError"+str(e))
         return hgchat()
 
 # 定义一个路由，用于显示主页面
@@ -153,7 +153,7 @@ def input():
         getContent = chatgpt_reply['choices'][0]['text']
         appendSession({'role': 'assistant', 'content': getContent})
         session.modified = True
-        print("gptContent:" + getContent)
+        logging.info("gptContent:" + getContent)
         return getContent
     else:
         return ""
