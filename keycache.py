@@ -43,3 +43,6 @@ class ApiKeyManager:
 
     def remove_all_keys(self):
         self.r.delete('api_keys')
+
+    def get_gh_chat_model_key(self):
+        return self.r.get('gh_chat_model_key').decode()

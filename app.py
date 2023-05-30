@@ -95,7 +95,7 @@ def get_hg_prompt(param):
 
 
 def hgchat():
-    openai.api_key = "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"
+    openai.api_key = api_key_manager.get_gh_chat_model_key()
     try:
         # 调用chatgpt3.5模型，传入对话列表
         response = openai.Completion.create(
