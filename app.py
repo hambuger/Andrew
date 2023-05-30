@@ -48,7 +48,7 @@ def appendSession(input):
         # 获取session的大小（字节）
         session_size = sys.getsizeof(session_value)
         # 如果session的大小超过4KB，将history里的内容取一半处理
-        if session_size > 3000:
+        if session_size > 1000:
             # 获取history对象数组
             history = session["history"]
             # 计算数组的长度
@@ -80,6 +80,35 @@ def chat():
     except openai.error.RateLimitError:
         return chat()
 
+
+def get_hg_prompt(param):
+    prompt = ""
+    # prompt":"韩家宝: 哪里呀\n龚琦: 旁边还有人露营 真羡慕\n韩家宝: 天气不错\n龚琦: 我到家了 嘿嘿\n韩家宝: 好\n龚琦: 明天要不要开电影呀\n我请你吃火锅哦\n###\n\n韩家宝: "
+    for message in param:
+        if message['role'] == 'user':
+            prompt = prompt + "韩家宝: " + message['content'] + "\n"
+        else:
+            prompt = prompt + "龚琦: " + message['content'] + "\n"
+    prompt = prompt + "###\n\n韩家宝: "
+    print("prompt:{}".format(prompt))
+    return prompt
+
+
+def hgchat():
+    openai.api_key = "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"
+    try:
+        # 调用chatgpt3.5模型，传入对话列表
+        response = openai.Completion.create(
+            model="ada:ft-personal:hamburger-2023-05-30-09-14-45",
+            prompt=get_hg_prompt(session['history']),
+            max_tokens=500,
+            temperature=0.4,
+            stop=["end"]
+        )
+        return response
+    except Exception as e:
+        print("RateLimitError"+str(e))
+        return hgchat()
 
 # 定义一个路由，用于显示主页面
 @app.route('/')
@@ -119,12 +148,12 @@ def input():
         appendSession({'role': 'user', 'content': user_input})
         session.modified = True
         # 用openai的聊天api生成一个回复
-        chatgpt_reply = chat()
+        chatgpt_reply = hgchat()
         # 把chatgpt的回复添加到对话历史中
-        appendSession(chatgpt_reply['choices'][0]['message'])
+        getContent = chatgpt_reply['choices'][0]['text']
+        appendSession({'role': 'assistant', 'content': getContent})
         session.modified = True
-        getContent = chatgpt_reply['choices'][0]['message']['content']
-        logging.info(current_time + "====IP:" + user_ip + "====gptContent:" + getContent)
+        print("gptContent:" + getContent)
         return getContent
     else:
         return ""
