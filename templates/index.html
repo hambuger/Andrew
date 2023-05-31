@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>对话ChatGPT</title>
-    <link rel="icon"  href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon"  href="/remember183sammy6399jax6582/static/favicon.ico">
     <style>
         /* 设置页面的样式 */
         body {
@@ -112,9 +112,9 @@
                 <div class="message {{ message.role }}">
                     <!-- 根据发言者，显示不同的头像 -->
                     {% if message.role == 'user' %}
-                        <img src="{{ url_for('static', filename='user.png') }}" class="avatar">
+                        <img src="/remember183sammy6399jax6582/static/user.png" class="avatar">
                     {% else %}
-                        <img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar">
+                        <img src="/remember183sammy6399jax6582/static/chatgpt.png" class="avatar">
                     {% endif %}
                     <!-- 显示消息的文本 -->
                     <span>{{ message.content }}</span>
@@ -144,7 +144,7 @@
         data: {user_input: "我回来了"}, // 请求的数据为空
         success: function(chatgpt_reply) { // 请求成功后的回调函数
             // 把服务器返回的数据添加到对话框中
-            var chatgpt_message = `<div class="message chatgpt"><img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar"><span class="text">${chatgpt_reply}</span></div>`;
+            var chatgpt_message = `<div class="message chatgpt"><img src="/remember183sammy6399jax6582/static/chatgpt.png" class="avatar"><span class="text">${chatgpt_reply}</span></div>`;
             $("#content").append(chatgpt_message);
             $("#content").scrollTop($("#content")[0].scrollHeight);
         }
@@ -161,7 +161,7 @@
               // 如果用户的输入不为空
               if (user_input) {
                   // 把用户的输入添加到对话框中
-                  var user_message = `<div class="message user"><img src="{{ url_for('static', filename='user.png') }}" class="avatar"><span class="text">${user_input}</span></div>`;
+                  var user_message = `<div class="message user"><img src="/remember183sammy6399jax6582/static/user.png" class="avatar"><span class="text">${user_input}</span></div>`;
                   $("#content").append(user_message);
                   // 清空输入框的内容
                   $("#input").val("");
@@ -174,7 +174,7 @@
                       data: {user_input: user_input}, // 请求的数据
                       dataType: "text", // 期望的响应数据类型
                       success: function(data) { // 请求成功后的回调函数
-                          var chatgpt_message = `<div class="message chatgpt"><img src="{{ url_for('static', filename='chatgpt.png') }}" class="avatar"><span class="text">${data}</span></div>`;
+                          var chatgpt_message = `<div class="message chatgpt"><img src="/remember183sammy6399jax6582/static/chatgpt.png" class="avatar"><span class="text">${data}</span></div>`;
                               $("#content").append(chatgpt_message);
                               // 滚动到底部
                               $("#content").scrollTop($("#content")[0].scrollHeight);
