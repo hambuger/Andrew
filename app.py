@@ -108,7 +108,7 @@ def hgchat():
         return response
     except Exception as e:
         logging.info("RateLimitError"+str(e))
-        return "等会再聊宝，我太忙了"
+        return None
 
 # 定义一个路由，用于显示主页面
 @app.route('/')
@@ -149,10 +149,15 @@ def input():
         session.modified = True
         # 用openai的聊天api生成一个回复
         chatgpt_reply = hgchat()
-        # 把chatgpt的回复添加到对话历史中
-        getContent = chatgpt_reply['choices'][0]['text']
-        appendSession({'role': 'assistant', 'content': getContent})
-        session.modified = True
+        # 如果回复不为空
+        getContent = ""
+        if chatgpt_reply:
+            # 把chatgpt的回复添加到对话历史中
+            getContent = chatgpt_reply['choices'][0]['text']
+            appendSession({'role': 'assistant', 'content': getContent})
+            session.modified = True
+        else:
+            getContent = "等会再聊宝，我太忙了"
         logging.info("gptContent:" + getContent)
         return getContent
     else:
