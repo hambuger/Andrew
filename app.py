@@ -78,7 +78,7 @@ def chat():
         )
         return response
     except openai.error.RateLimitError:
-        return chat()
+        return "等会再聊宝，我太忙了"
 
 
 def get_hg_prompt(param):
