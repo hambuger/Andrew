@@ -99,7 +99,7 @@ def hgchat():
     try:
         # 调用chatgpt3.5模型，传入对话列表
         response = openai.Completion.create(
-            model="ada:ft-personal:hamburger-2023-05-30-09-14-45",
+            model="ada:ft-personal:hamburger-2023-05-30-11-59-55",
             prompt=get_hg_prompt(session['history']),
             max_tokens=500,
             temperature=0.4,
