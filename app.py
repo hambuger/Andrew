@@ -108,7 +108,7 @@ def hgchat():
         return response
     except Exception as e:
         logging.info("RateLimitError"+str(e))
-        return hgchat()
+        return "等会再聊宝，我太忙了"
 
 # 定义一个路由，用于显示主页面
 @app.route('/')
