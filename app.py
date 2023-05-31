@@ -18,7 +18,7 @@ import numpy as np
 from blog import query_data_by_id
 
 # 创建一个flask应用
-app = Flask(__name__, static_url_path='/remember183sammy6399jax6582/static')
+app = Flask(__name__)
 # 设置一个密钥，用于保存session
 app.secret_key = 'some_secret_key'
 # 保存日志
