@@ -61,7 +61,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                             }},
                             "script_score": {
                                 "script": {
-                                    "source": "0.5 / (1 + Math.exp(-_score / 10.0))"
+                                    "source": "1 / (1 + Math.exp(-_score / 10.0))"
                                 }
                             }
                         },
