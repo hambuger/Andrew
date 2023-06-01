@@ -174,6 +174,11 @@ Based on chat history and memories, respond to the message between first <<< and
 <<<{content}>>>"
     return prompt
 
+def generateChagGPTPrompt2(result):
+    prompt = f"The chat records that appear between the first ```` and last ```` are from the past. \n \
+````{result}````\n Do not reveal in your reply if they are unuseful\n"
+    return prompt
+
 
 def sumMessageToken(newMessages):
     tokens = 0
@@ -181,28 +186,58 @@ def sumMessageToken(newMessages):
         tokens = tokens + len(encoding.encode(message["role"] + message["content"]))
     return tokens
 
+# 第三个版本的prompt，将历史消息和提示放到system提示中
+def generateMessagesV3(content, content_vector, creator, ip, messages):
+    try:
+        response = query_vector_to_string(content_vector, creator, ip)
+        if response and response['hits']['total']['value'] == 0:
+            return messages
+        content_list = []
+        node_id_list = []
+        for i, hit in enumerate(response['hits']['hits']):
+            # 将其按照需要的格式添加到列表中
+            node_id_list.append(hit['_source'].get('content_node_id', ''))
+            node_id_list.append(hit['_source'].get('parent_id', ''))
+        node_id_list = list(filter(None, node_id_list))
+        nodeResponse = query_node_id_to_string(node_id_list, creator)
+        for j, hit2 in enumerate(nodeResponse['hits']['hits']):
+            generated_content2 = hit2['_source'].get('generated_content', '')
+            creator2 = hit2['_source'].get('content_creator', '')
+            creatorTime = hit2['_source'].get('content_creation_time', '')
+            content_list.append("(" + creatorTime + ") " + creator2 + ":" + generated_content2)
+        result = ""
+        for i, contentStr in enumerate(content_list):
+            result = result + f"{i + 1}:{contentStr}" + "\n"
 
-def generateNewMessages(content_vector, creator, ip, messages):
+        result = generateChagGPTPrompt2(result)
+        messages.insert(0, {'role': 'system', 'content': result})
+        return messages
+    except Exception as e:
+        logging.info("generateMessagesV3 error: {}".format(e))
+        return messages
+
+# 第二版本的prompt，将历史消息当成对话元素放在messages中
+def generateMessagesV2(content, content_vector, creator, ip, messages):
     try:
         response = query_vector_to_string(content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
         newMessages = messages[-2:]
         tokenNum = sumMessageToken(newMessages)
-        if tokenNum > 4096:
+        if tokenNum > 3000:
             return newMessages[:-1]
         for i, hit in enumerate(response['hits']['hits']):
             # 将其按照需要的格式添加到列表中
             user = 'assistant' if hit['_source'].get('content_creator', '') == 'gpt-3.5' else 'user'
             tokenNum = tokenNum + len(encoding.encode(user + hit['_source'].get('generated_content', '')))
-            if tokenNum > 4096:
+            if tokenNum > 3000:
                 return newMessages
             newMessages.insert(0, {'role': user, 'content': hit['_source'].get('generated_content', '')})
         otherMessages = messages[:-2]
         y = 3
         for message in otherMessages[::-1]:
             tokenNum = tokenNum + len(encoding.encode(message["role"] + message["content"]))
-            if tokenNum > 4096:
+            if tokenNum > 3000:
                 return newMessages
             newMessages.insert(-y, message)
             y = y + 1
@@ -212,12 +247,12 @@ def generateNewMessages(content_vector, creator, ip, messages):
         logging.info("generateNewMessages error: {}".format(e))
         return messages
 
-
-def generateNewContent(content, content_vector, creator, ip):
+# 第一版本的prompt：将历史消息的信息和提示放在user消息的最后一条中
+def generateMessagesV1(content, content_vector, creator, ip, messages):
     try:
         response = query_vector_to_string(content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
-            return content
+            return messages
         content_list = []
         node_id_list = []
         for i, hit in enumerate(response['hits']['hits']):
@@ -236,9 +271,11 @@ def generateNewContent(content, content_vector, creator, ip):
             result = result + f"{i + 1}:{contentStr}" + "\n"
 
         result = generateChagGPTPrompt(content, result)
-        return result
+        messages[-1]['content'] = result
+        return messages
     except Exception as e:
         logging.info("generateNewContent error: {}".format(e))
+        return messages
 
 @app.route('/v1/chat/completions', methods=['POST'])
 def hangpt():
@@ -262,9 +299,8 @@ def hangpt():
         # 持久化对话信息
         embedding = openai.Embedding.create(input=[content], model="text-embedding-ada-002")
         content_vector = np.array(embedding["data"][0]["embedding"]).tolist()
-        messages = generateNewMessages(content_vector, userName, ip or client_ip, messages)
+        messages = generateMessagesV3(content, content_vector, userName, ip or client_ip, messages)
         # logging.info("gpt_content: {}".format(gpt_content))
-        # messages[-1]['content'] = gpt_content
         insert_document(messageId, parentId, ip or client_ip, userName, userName, content, 0.5, content_vector)
         logging.info("messages: {}".format(messages))
         response = openai.ChatCompletion.create(
