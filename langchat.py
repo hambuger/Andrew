@@ -37,7 +37,7 @@ def query_node_id_to_string(node_id_list, creator):
 
 
 #  查询相关的文本内容
-def query_vector_to_string(query_vector, content_owner, ip):
+def query_vector_to_string(content, query_vector, content_owner, ip):
     query_body = None
     if content_owner and content_owner != "default":
         # 定义查询
@@ -46,7 +46,7 @@ def query_vector_to_string(query_vector, content_owner, ip):
             "query": {
                 "function_score": {
                     "query": {
-                        "match": {
+                        "term": {
                             "content_owner": content_owner
                         }
                     },
@@ -54,7 +54,12 @@ def query_vector_to_string(query_vector, content_owner, ip):
                     "boost_mode": "replace",
                     "functions": [
                         {
-                            "filter": {"match_all": {}},
+                            "filter": {"match": {
+                                "generated_content": {
+                                    "query": content,
+                                    "minimum_should_match": "80%"
+                                }
+                            }},
                             "script_score": {
                                 "script": {
                                     "source": "0.5 / (1 + Math.exp(-_score / 10.0))"

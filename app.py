@@ -189,7 +189,7 @@ def sumMessageToken(newMessages):
 # 第三个版本的prompt，将历史消息和提示放到system提示中
 def generateMessagesV3(content, content_vector, creator, ip, messages):
     try:
-        response = query_vector_to_string(content_vector, creator, ip)
+        response = query_vector_to_string(content, content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
         content_list = []
@@ -219,7 +219,7 @@ def generateMessagesV3(content, content_vector, creator, ip, messages):
 # 第二版本的prompt，将历史消息当成对话元素放在messages中
 def generateMessagesV2(content, content_vector, creator, ip, messages):
     try:
-        response = query_vector_to_string(content_vector, creator, ip)
+        response = query_vector_to_string(content, content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
         newMessages = messages[-2:]
@@ -250,7 +250,7 @@ def generateMessagesV2(content, content_vector, creator, ip, messages):
 # 第一版本的prompt：将历史消息的信息和提示放在user消息的最后一条中
 def generateMessagesV1(content, content_vector, creator, ip, messages):
     try:
-        response = query_vector_to_string(content_vector, creator, ip)
+        response = query_vector_to_string(content, content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
         content_list = []
