@@ -56,8 +56,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                         {
                             "filter": {"match": {
                                 "generated_content": {
-                                    "query": content,
-                                    "minimum_should_match": "80%"
+                                    "query": content
                                 }
                             }},
                             "script_score": {
