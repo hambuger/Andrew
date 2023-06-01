@@ -113,11 +113,23 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                     "boost_mode": "replace",
                     "functions": [
                         {
+                            "filter": {"match": {
+                                "generated_content": {
+                                    "query": content
+                                }
+                            }},
+                            "script_score": {
+                                "script": {
+                                    "source": "1 / (1 + Math.exp(-_score / 10.0))"
+                                }
+                            }
+                        },
+                        {
                             "filter": {"match_all": {}},
                             "exp": {
                                 "content_last_access_time": {
-                                    "scale": "10m",
-                                    "decay": 0.99
+                                    "scale": "1h",
+                                    "decay": 0.5
                                 }
                             }
                         },
@@ -132,7 +144,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                             "filter": {"match_all": {}},
                             "script_score": {
                                 "script": {
-                                    "source": "cosineSimilarity(params.query_vector, 'content_vector') + 1.0",
+                                    "source": "(cosineSimilarity(params.query_vector, 'content_vector') + 1.0) / 2.0",
                                     "params": {
                                         "query_vector": query_vector
                                     }
