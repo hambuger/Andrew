@@ -16,6 +16,7 @@ from langchat import query_vector_to_string, insert_document, query_node_id_to_s
 from keycache import ApiKeyManager
 import numpy as np
 from blog import query_data_by_id
+from datetime import datetime
 
 # 创建一个flask应用
 app = Flask(__name__)
@@ -175,8 +176,12 @@ Based on chat history and memories, respond to the message between first <<< and
     return prompt
 
 def generateChagGPTPrompt2(result):
+    # 获取当前时间
+    now = datetime.now()
+    # 将当前时间转换为字符串
+    current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
     prompt = f"The chat records that appear between the first ```` and last ```` are from the past. \n \
-````{result}````\n Do not reveal in your reply if they are unuseful\n"
+````{result}````\n Do not reveal in your reply if they are unuseful\nNow is {current_time_str}\n"
     return prompt
 
 
@@ -189,6 +194,10 @@ def sumMessageToken(newMessages):
 # 第三个版本的prompt，将历史消息和提示放到system提示中
 def generateMessagesV3(content, content_vector, creator, ip, messages):
     try:
+        length = sumMessageToken(messages)
+        while length > 3000:
+            messages = messages[len(messages) // 2:]
+            length = sumMessageToken(messages)
         response = query_vector_to_string(content, content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
@@ -208,6 +217,9 @@ def generateMessagesV3(content, content_vector, creator, ip, messages):
         result = ""
         for i, contentStr in enumerate(content_list):
             result = result + f"{i + 1}:{contentStr}" + "\n"
+            length = length + len(encoding.encode(contentStr))
+            if length > 3000:
+                break
 
         result = generateChagGPTPrompt2(result)
         messages.insert(0, {'role': 'system', 'content': result})
