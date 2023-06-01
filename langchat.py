@@ -69,7 +69,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                             "filter": {"match_all": {}},
                             "exp": {
                                 "content_last_access_time": {
-                                    "scale": "10m",
+                                    "scale": "1h",
                                     "decay": 0.5
                                 }
                             }
