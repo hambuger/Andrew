@@ -1,23 +1,13 @@
-from datetime import datetime
-from elasticsearch import Elasticsearch
 import logging
-from keycache import ApiKeyManager
+from datetime import datetime
+
+from util.es.es import es
 
 # 保存日志
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s [Line: %(lineno)d]: %(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p'
-)
-
-# 实例化 Elasticsearch 客户端
-es = Elasticsearch(hosts=["http://localhost:9200"])
-
-api_key_manager = ApiKeyManager()
+logger = logging.getLogger(__name__)
 
 
-def query_node_id_to_string(node_id_list, creator):
+def query_by_node_id(node_id_list, creator):
     query_body = {
         "query": {
             "bool": {
@@ -159,14 +149,14 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
             ]
         }
     else:
-        logging.warn("query_vector_to_string: content_owner and ip are both None")
+        logger.warning("query_vector_to_string: content_owner and ip are both None")
         return None
     return es.search(index="lang_chat_content", body=query_body)
 
 
 # 插入文档
-def insert_document(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
-                    content_vector):
+def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
+                   content_vector):
     # 使用OpenAI的embedding生成向量
     try:
         # 获取当前时间
@@ -193,4 +183,4 @@ def insert_document(content_node_id, parent_id, creator_ip, content_owner, creat
 
         return res
     except Exception as e:
-        logging.info(e)
+        logger.info(e)

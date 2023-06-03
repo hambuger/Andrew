@@ -1,11 +1,12 @@
+import os
 import random
 import time
 import redis
 
 
 class ApiKeyManager:
-    def __init__(self, redis_host='localhost', redis_port=6379, db=0):
-        self.r = redis.Redis(host=redis_host, port=redis_port, db=db)
+    def __init__(self, redis_host=os.getenv("REDIS_HOST"), redis_port=os.getenv("REDIS_PORT"), db=0):
+        self.r = redis.Redis(host=redis_host, port=int(redis_port), db=db)
 
         self.lua = """
         local keys = redis.call('LRANGE', 'api_keys', 0, -1)
@@ -46,3 +47,14 @@ class ApiKeyManager:
 
     def get_gh_chat_model_key(self):
         return self.r.get('gh_chat_model_key').decode()
+
+    def update_key_value(self, key, value):
+        self.r.set(key, value)
+
+    def get_key_value(self, key):
+        if self.r.get(key) is None:
+            return None
+        return self.r.get(key).decode()
+
+
+api_key_manager = ApiKeyManager()

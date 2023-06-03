@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>excel对话</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 10px;
+        }
+
+        #chatbox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 80%;
+            overflow-y: scroll;
+        }
+
+        #chatbox p {
+            margin: 5px 0;
+        }
+
+        #chatbox .system-message {
+            color: blue;
+        }
+
+        #chatbox .user-message {
+            color: green;
+        }
+
+        #chatbox .bot-message {
+            color: red;
+        }
+
+        input[type="file"],
+        input[type="submit"] {
+            margin-top: 10px;
+        }
+
+        /* 增加样式以美化发送框和发送按钮 */
+        input[type="text"] {
+            margin-top: 10px;
+            width: 80%; /* 扩大输入框 */
+            padding: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: green; /* 更改发送按钮为绿色 */
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 获取历史对话
+            var chatHistory = localStorage.getItem('chatHistory');
+            if (chatHistory) {
+                $('#chatbox').html(chatHistory);
+            }
+
+            // 监听选择文件按钮的变化事件
+            $('input[name="file"]').change(function() {
+                var file = $(this).prop('files')[0];
+                handleFileUpload(file); // 直接传递原始的 File 对象
+            });
+
+            // 监听发送消息表单的提交事件
+            $('form#chat-form').submit(function(event) {
+                event.preventDefault();  // 阻止表单默认提交行为
+
+                // 获取用户输入的消息
+                var message = $('input[name="message"]').val();
+
+                // 在聊天框中显示用户输入的消息
+                var userMessage = '<p class="user-message">你: ' + message + '</p>';
+                $('#chatbox').append(userMessage);
+
+                // 清空输入框
+                $('input[name="message"]').val('');
+
+                // 滚动到底部
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+
+                // 发送消息并获取回复
+                $.ajax({
+                    url: '/excel/chat',
+                    type: 'POST',
+                    data: {
+                        message: message
+                    },
+                    success: function(response) {
+                        // 在聊天框中显示机器人回复
+                        var botMessage = '<p class="bot-message">Bot: ' + response + '</p>';
+                        $('#chatbox').append(botMessage);
+
+                        // 滚动到底部
+                        $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+
+                        // 保存对话历史到浏览器缓存
+                        var chatHistory = $('#chatbox').html();
+                        localStorage.setItem('chatHistory', chatHistory);
+                    }
+                });
+            });
+
+            function handleFileUpload(fileData) {
+                // 构建 FormData 对象
+                  var formData = new FormData();
+                  formData.append('file', fileData);
+
+                  // 发送 AJAX 请求
+                  $.ajax({
+                    url: '/excel/upload',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                      // 处理上传成功后的响应
+                      console.log('File uploaded successfully:', response);
+                    },
+                    error: function(xhr, status, error) {
+                      // 处理上传失败的情况
+                      console.error('File upload error:', error);
+                    }
+                  });
+            }
+        });
+
+
+    </script>
+</head>
+<body>
+<h1>excel对话</h1>
+
+<form id="upload-form" action="/excel/upload" method="post" enctype="multipart/form-data">
+    <label class="file-upload-button">
+        <span>上传本地文件</span>
+        <input type="file" name="file">
+    </label>
+</form>
+
+<div id="chatbox">
+    <!-- 这里显示聊天的内容 -->
+</div>
+
+<form id="chat-form" action="/excel/chat" method="post">
+    <input type="text" name="message">
+    <input type="submit" value="发送">
+</form>
+</body>
+</html>
