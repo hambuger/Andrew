@@ -74,7 +74,6 @@ def upload_file():
                 for index, row in dataframe.iterrows():
                     # 将每一行的数据转换为 list 并添加到 data_list
                     data_list.append(row.tolist())
-                mapping = None
                 try:
                     index_name = session_id + '_' + file_name
                     # 如果es不存在索引，创建索引
@@ -93,6 +92,8 @@ def upload_file():
                         mapping = json.loads(content)
                         logger.info("mapping{}".format(mapping))
                         es.indices.create(index=index_name, body=mapping)
+                        session['mappings'] = mapping
+                        session.modified = True
                         task = threading.Timer(60 * 5, deal, args=(session_id,))
                         task.start()
                     actions = []
@@ -123,8 +124,6 @@ def upload_file():
                     # 批量插入剩余的数据
                     if len(actions) > 0:
                         bulk_insert(actions)
-                    session['mappings'] = mapping
-                    session.modified = True
                     return "success"
                 except OpenAIError as e:
                     logger.info(e)
