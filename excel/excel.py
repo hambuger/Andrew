@@ -163,7 +163,7 @@ def chat():
     dslStr = response['choices'][0]['message']['content']
     query = json.loads(dslStr)
     logger.info("query{}".format(query))
-    indexList = es.search(index=session['sid'] + '_' + +session['file_name'], body=query)
+    indexList = es.search(index=session['sid'] + '_' + session['file_name'], body=query)
     sourceList = []
     if indexList['hits']['total']['value'] == 0:
         return "没有找到相关数据"
