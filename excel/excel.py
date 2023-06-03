@@ -11,7 +11,7 @@ import math
 import threading
 import time
 from util.redis.redis_client import api_key_manager
-from openai_util.prompt import get_excel_2_es_result_prompt, get_excel_2_es_mapping_prompt
+from openai_util.prompt import get_excel_2_es_result_prompt, get_excel_2_es_mapping_prompt_v2
 
 # 存储上传的Excel文件的数据
 dataframe = None
@@ -80,7 +80,7 @@ def upload_file():
                     # 如果es不存在索引，创建索引
                     if not es.indices.exists(index=index_name):
                         # 调用chatgpt3.5模型，传入对话列表
-                        message = get_excel_2_es_mapping_prompt(data_list[:10])
+                        message = get_excel_2_es_mapping_prompt_v2(data_list[:10])
                         logger.info("message{}".format(message))
                         openai.api_key = api_key_manager.get_key()
                         response = openai.ChatCompletion.create(

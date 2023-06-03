@@ -34,9 +34,18 @@ def get_hg_prompt(param):
     return prompt
 
 
-def get_excel_2_es_mapping_prompt(data_list):
+def get_excel_2_es_mapping_prompt_v1(data_list):
     format = "{\"mappings\":{\"properties\":{\"title\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"type\":\"keyword\",\"ignore_above\":256}},\"analyzer\":\"ik_max_word\"},\"date\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss||epoch_millis\"},\"content\":{\"type\":\"keyword\"},\"佣金比\":{\"type\":\"float\"}},\"_meta\":{\"佣金比\":\"商品佣金比，是0-1范围数据\"}}}"
     return f"""根据下面的一些数据并结合其中字段的语义写出es的创建index的dSL，如果可以在_meta中写出你推算出的字段取值范围，一般都是0到某个数组，如0-1，0-100，0-10000。如果是日期，你需要注意设置它的日期格式。如果创建text类型，你应该同时创建一个256长度的keyword，并且指定分词器是ik_max_word。
+{data_list}\n
+特别注意：不要再回答中体现你的推理过程，只要回复类似下面````之间的数据，无论如何确保你的回复能被解析成json对象
+````
+{format}
+````"""
+
+def get_excel_2_es_mapping_prompt_v2(data_list):
+    format = "{\"mappings\":{\"properties\":{\"title\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"type\":\"keyword\",\"ignore_above\":256}},\"analyzer\":\"ik_max_word\"},\"date\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss||epoch_millis\"},\"content\":{\"type\":\"keyword\"},\"佣金比\":{\"type\":\"float\"}},\"_meta\":{\"字段一\":\"字段功能，字段取值范围0-100\",\"字段二\":\"字段功能，字段取值范围0-1\"}}}"
+    return f"""根据下面的一些数据并结合其中字段的语义写出es的创建index的dSL，如果可以在_meta中写出你推算出的字段取值范围,_meta不应该出现在properties里，一般都是0到某个数组，如0-1，0-100，0-10000。如果是日期，你需要注意设置它的日期格式。如果创建text类型，你应该同时创建一个256长度的keyword，并且指定分词器是ik_max_word.
 {data_list}\n
 特别注意：不要再回答中体现你的推理过程，只要回复类似下面````之间的数据，无论如何确保你的回复能被解析成json对象
 ````
