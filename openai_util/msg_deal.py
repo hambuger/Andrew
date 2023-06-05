@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def sum_message_token(new_messages):
     tokens = 0
     for message in new_messages:
-        tokens = tokens + len(gpt_3_encoding.encode(message["role"] + message["content"]))
+        tokens = tokens + len(encoding.encode(message["role"] + message["content"]))
     return tokens
 
 
