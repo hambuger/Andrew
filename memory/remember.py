@@ -155,7 +155,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
 
 
 # 插入文档
-def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
+async def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
                    content_vector):
     # 使用OpenAI的embedding生成向量
     try:
