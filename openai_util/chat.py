@@ -71,6 +71,7 @@ def add_message_record(params, message_id, parent_id):
     content = messages[-1].get("content")
     content_vector = get_embedding(content)
     params['messages'] = generate_messages_v3(content, content_vector, userName, ip, messages)
+    logger.info('messages: {}'.format(params['messages']))
     asyncio.run(insert_history(message_id, parent_id, ip, userName, userName, content, 0.5, content_vector))
     # 异步任务已启动，立即返回需要的值
     return userName, ip
