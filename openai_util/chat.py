@@ -56,9 +56,9 @@ def set_req_api_key(auth_info):
     if auth_info:
         api_key = auth_info.replace('Bearer ', '')
         if not need_user_api_key and (not api_key or not api_key.startswith('sk-')):
-            api_key = api_key_manager.get_key()
+            api_key = api_key_manager.get_openai_key()
     elif not need_user_api_key:
-        api_key = api_key_manager.get_key()
+        api_key = api_key_manager.get_openai_key()
     openai.api_key = api_key
 
 
@@ -114,9 +114,9 @@ def deal_request_param():
     if auth_info:
         api_key = auth_info.replace('Bearer ', '')
         if not need_user_api_key and (not api_key or not api_key.startswith('sk-')):
-            api_key = api_key_manager.get_key()
+            api_key = api_key_manager.get_openai_key()
     elif not need_user_api_key:
-        api_key = api_key_manager.get_key()
+        api_key = api_key_manager.get_openai_key()
     openai.api_key = api_key
     # 获取接口参数
     req_model = request.json.get('model')

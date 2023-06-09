@@ -63,7 +63,7 @@ def append_session(input_msg):
 
 # 调用chatgpt对话
 def chat():
-    openai.api_key = api_key_manager.get_key()
+    openai.api_key = api_key_manager.get_openai_key()
     try:
         # 调用chatgpt3.5模型，传入对话列表
         response = openai.ChatCompletion.create(

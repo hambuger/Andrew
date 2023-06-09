@@ -81,7 +81,7 @@ def upload_file():
                         # 调用chatgpt3.5模型，传入对话列表
                         message = get_excel_2_es_mapping_prompt_v2(data_list[:10])
                         logger.info("message{}".format(message))
-                        openai.api_key = api_key_manager.get_key()
+                        openai.api_key = api_key_manager.get_openai_key()
                         response = openai.ChatCompletion.create(
                             model="gpt-3.5-turbo",
                             messages=[{"role": "user", "content": message}],
@@ -150,7 +150,7 @@ def chat():
         return "请先上传数据或者请等待数据处理完成"
     # 使用 GPT-3 生成回应
     mappings = session['mappings']
-    openai.api_key = api_key_manager.get_key()
+    openai.api_key = api_key_manager.get_openai_key()
     response = ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[

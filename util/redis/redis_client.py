@@ -29,8 +29,29 @@ class ApiKeyManager:
         """
         self.get_key_script = self.r.register_script(self.lua)
 
-    # 获取可用的key, 指数退避重试，最多重试5次
-    def get_key(self, max_retries=5):
+        self.lua2 = """
+        local keys = redis.call('LRANGE', 'stream_ship_keys', 0, -1)
+        for i, key in ipairs(keys) do
+            local total_usage = redis.call('GET', 'stream_ship_key_total_usage:' .. key)
+            if total_usage then
+                total_usage = tonumber(total_usage)
+            else
+                total_usage = 0
+            end
+            if total_usage < 500 then
+                redis.call('INCR', 'stream_ship_key_total_usage:' .. key)
+                return key
+            else
+                -- Remove the key from the list if its total usage exceeds 500
+                redis.call('LREM', 'stream_ship_keys', 0, key)
+            end
+        end
+        return nil
+        """
+        self.get_stream_ship_key_script = self.r.register_script(self.lua2)
+
+    # 获取可用的key, 指数退避重试，最多重试3次
+    def get_openai_key(self, max_retries=3):
         for i in range(max_retries):
             key = self.get_key_script(args=[time.time()])
             if key is not None:
@@ -42,8 +63,23 @@ class ApiKeyManager:
 
         raise Exception("太多请求，没有可用的key了")
 
-    def remove_all_keys(self):
+    def get_stream_key_key(self, max_retries=3):
+        for i in range(max_retries):
+            key = self.get_stream_ship_key_script()
+            if key is not None:
+                return key.decode()  # Redis返回的key是bytes，需要decode转为str
+
+            # 指数退避
+            backoff_time = 2 ** i + random.uniform(0, 1)
+            time.sleep(backoff_time)
+
+        raise Exception("太多请求，没有可用的key了")
+
+    def remove_all_openai_keys(self):
         self.r.delete('api_keys')
+
+    def remove_all_stream_ship_keys(self):
+        self.r.delete('stream_ship_keys')
 
     def get_gh_chat_model_key(self):
         return self.r.get('gh_chat_model_key').decode()

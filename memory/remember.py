@@ -42,7 +42,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                 "function_score": {
                     "query": {
                         "term": {
-                            "content_owner": content_owner
+                            "content_creator": content_owner
                         }
                     },
                     "score_mode": "sum",
@@ -160,7 +160,7 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
 
 
 def chat_with_single_msg(content):
-    openai.api_key = api_key_manager.get_key()
+    openai.api_key = api_key_manager.get_openai_key()
     try:
         prompt_msg = get_message_important_score(content)
         response = openai.ChatCompletion.create(
@@ -175,16 +175,10 @@ def chat_with_single_msg(content):
 
 
 def get_msg_important_score(content):
-    score_list = []
-    for i in range(3):
-        score = chat_use_stream_ship(get_message_important_score(content))
-        try:
-            score_list.append(float(score))
-        except ValueError:
-            continue
-    if score_list:
-        return round(sum(score_list) / len(score_list), 2)
-    else:
+    score = chat_use_stream_ship(get_message_important_score(content))
+    try:
+        return float(score)
+    except ValueError:
         return 0
 
 
@@ -195,7 +189,7 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
         # 获取当前时间
         current_time = datetime.now()
         score = 0
-        if os.getenv('USE_IMPORTANT_SCORE','False') == 'True':
+        if os.getenv('USE_IMPORTANT_SCORE', 'False') == 'True' and not 'gpt-3.5' == creator:
             score = get_msg_important_score(content)
 
         # 创建文档
