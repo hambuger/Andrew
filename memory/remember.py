@@ -1,7 +1,12 @@
 import logging
+import os
 from datetime import datetime
+import openai
 
 from util.es.es import es
+from util.redis.redis_client import api_key_manager
+from openai_util.prompt import get_message_important_score
+from openai_util.gpt4.stream_ship import chat_use_stream_ship
 
 # 保存日志
 logger = logging.getLogger(__name__)
@@ -154,13 +159,44 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
     return es.search(index="lang_chat_content", body=query_body)
 
 
+def chat_with_single_msg(content):
+    openai.api_key = api_key_manager.get_key()
+    try:
+        prompt_msg = get_message_important_score(content)
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{'role': 'user', 'content': prompt_msg}],
+            temperature=0,
+        )
+        return response['choices'][0]['message']['content']
+    except openai.OpenAIError as e:
+        logger.exception(e)
+        return e
+
+
+def get_msg_important_score(content):
+    score_list = []
+    for i in range(3):
+        score = chat_use_stream_ship(get_message_important_score(content))
+        try:
+            score_list.append(float(score))
+        except ValueError:
+            continue
+    if score_list:
+        return round(sum(score_list) / len(score_list), 2)
+    else:
+        return 0
+
+
 # 插入文档
-async def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, importance,
-                   content_vector):
+def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, content_vector):
     # 使用OpenAI的embedding生成向量
     try:
         # 获取当前时间
         current_time = datetime.now()
+        score = 0
+        if os.getenv('USE_IMPORTANT_SCORE','False') == 'True':
+            score = get_msg_important_score(content)
 
         # 创建文档
         doc = {
@@ -170,7 +206,7 @@ async def insert_history(content_node_id, parent_id, creator_ip, content_owner, 
             "content_creation_time": current_time,
             "content_last_access_time": current_time,
             "generated_content": content,
-            "content_importance": importance,
+            "content_importance": float(score),
             "content_type": 1,
             "content_vector": content_vector,
             "content_owner": content_owner,
@@ -180,7 +216,6 @@ async def insert_history(content_node_id, parent_id, creator_ip, content_owner, 
         docId = content_owner + "_" + content_node_id
         # 插入文档
         res = es.index(index="lang_chat_content", body=doc, id=docId)
-
         return res
     except Exception as e:
         logger.info(e)

@@ -10,7 +10,9 @@ from memory.remember import insert_history
 from openai_util.msg_deal import generate_messages_v3
 from util.redis.redis_client import api_key_manager
 from openai_util.embedding import get_embedding
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(10)
 
 chat_route = Blueprint('chat', __name__)
 
@@ -72,16 +74,16 @@ def add_message_record(params, message_id, parent_id):
     content_vector = get_embedding(content)
     params['messages'] = generate_messages_v3(content, content_vector, userName, ip, messages)
     logger.info('messages: {}'.format(params['messages']))
-    asyncio.run(insert_history(message_id, parent_id, ip, userName, userName, content, 0.5, content_vector))
+    # 异步处理保存聊天记录
+    executor.submit(insert_history, message_id, parent_id, ip, userName, userName, content, content_vector)
     # 异步任务已启动，立即返回需要的值
     return userName, ip
 
 
 # 插入GPT的返回记录
-async def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
+def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
     content_vector = get_embedding(''.join(all_contents))
-    await insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), 0.5,
-                         content_vector)
+    insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), content_vector)
 
 
 # 处理流式返回
@@ -95,7 +97,7 @@ def deal_stream_response(params, response, parent_id, user_name, ip):
             all_contents.append(content)
             botMsgIds.append(chunk['id'])
             yield 'data: ' + json.dumps(chunk) + '\n\n'
-        asyncio.run(add_response_record(all_contents, botMsgIds, parent_id, ip, user_name))
+        executor.submit(add_response_record, all_contents, botMsgIds, parent_id, ip, user_name)
 
     if params.get('stream'):
         return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
