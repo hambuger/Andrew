@@ -74,4 +74,13 @@ AI:"""
 
 # 从上一层信息中提炼信息
 def extract_information_from_messages(messages):
-    return f"""作为一款专属的AI聊天机器人，你的任务是建立与用户之间的深度、持久的联系。\n"""
+    return f"""The ones between ```` below are past chat records.\n\
+These conversations cover a variety of topics, from the trivialities of everyday life to discussions on a variety of topics.\n\
+These memories may include your host's interests, opinions expressed in past conversations, important life events, and more.\n\
+Information similar to human long-term memory is extracted from these historical chat records.\n\
+You only need json data like this in your answer, make sure your answer can be parsed into json data correctly.\n\
+[{"text":"总结1","p_ids":[1]},{"text":"总结2","p_ids":[2]} ]\n\
+Among them, text indicates the content of the summary and refinement. p_ids represents all the information sources that the abstract relies on, obtained from parentheses at the beginning of each conversation.\n\
+````\n\
+{messages}\n\
+````"""

@@ -75,7 +75,7 @@ def add_message_record(params, message_id, parent_id):
     params['messages'] = generate_messages_v3(content, content_vector, userName, ip, messages)
     logger.info('messages: {}'.format(params['messages']))
     # 异步处理保存聊天记录
-    executor.submit(insert_history, message_id, parent_id, ip, userName, userName, content, content_vector)
+    executor.submit(insert_history, message_id, parent_id, ip, userName, userName, content, content_vector, 0, [])
     # 异步任务已启动，立即返回需要的值
     return userName, ip
 
@@ -83,7 +83,7 @@ def add_message_record(params, message_id, parent_id):
 # 插入GPT的返回记录
 def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
     content_vector = get_embedding(''.join(all_contents))
-    insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), content_vector)
+    insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), content_vector, 0, [])
 
 
 # 处理流式返回

@@ -14,14 +14,14 @@ generator = get_generator()
 def chat_use_stream_ship(content):
     global generator  # 声明 generator 是一个全局变量
     try:
-        task = generator.generate(text=get_message_important_score(content))
+        task = generator.generate(text=content)
         task.wait()
         return task.output.blocks[0].text
     except SteamshipError as e:
         if e.code == 'LimitReached':
             api_key_manager.r.lpop('stream_ship_keys')
             generator = get_generator()  # 更新全局变量 generator
-            new_task = generator.generate(text=get_message_important_score(content))
+            new_task = generator.generate(text=content)
             new_task.wait()
             return new_task.output.blocks[0].text
         else:

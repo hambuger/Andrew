@@ -14,6 +14,13 @@ def sum_message_token(new_messages):
     return tokens
 
 
+def sum_text_token(text_list):
+    tokens = 0
+    for text in text_list:
+        tokens = tokens + len(text)
+    return tokens
+
+
 # 第三个版本的prompt，将历史消息和提示放到system提示中
 def generate_messages_v3(content, content_vector, creator, ip, messages):
     try:
@@ -31,7 +38,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
         node_id_list = list(filter(None, node_id_list))
-        nodeResponse = query_by_node_id(node_id_list, creator)
+        nodeResponse = query_by_node_id(node_id_list)
         for j, hit2 in enumerate(nodeResponse['hits']['hits']):
             generated_content2 = hit2['_source'].get('generated_content', '')
             creator2 = hit2['_source'].get('content_creator', '')
@@ -97,7 +104,7 @@ def generate_messages_v1(content, content_vector, creator, ip, messages):
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
         node_id_list = list(filter(None, node_id_list))
-        nodeResponse = query_by_node_id(node_id_list, creator)
+        nodeResponse = query_by_node_id(node_id_list)
         for j, hit2 in enumerate(nodeResponse['hits']['hits']):
             generated_content2 = hit2['_source'].get('generated_content', '')
             creator2 = hit2['_source'].get('content_creator', '')
