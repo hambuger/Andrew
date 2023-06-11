@@ -244,12 +244,13 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
         # 检查是否需要归纳历史聊天
         gpt_flag = 'gpt-3.5' == creator
         if not creator == 'default':
-            try_add_extract_info_from_leaf(content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag)
+            try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag)
     except Exception as e:
         logger.info(e)
 
 
-def try_add_extract_info_from_leaf(content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag):
+def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip,
+                                   gpt_flag):
     current_leaf_context_list_key = content_owner + "_leaf_" + str(content_leaf_depth) + "_text_list"
     for i in range(5):  # 尝试执行 5 次
         try:
@@ -262,9 +263,12 @@ def try_add_extract_info_from_leaf(content, content_leaf_depth, content_owner, c
                 api_key_manager.r.delete(current_leaf_context_list_key)
                 executor.submit(insert_extract_info_list, content_leaf_depth, content_owner, creator,
                                 creator_ip, r_content_list)
-            save_r_content = 'USER:' + content + '\n'
-            if gpt_flag:
-                save_r_content = 'AI:' + content + '\n'
+            if content_leaf_depth == 0:
+                save_r_content = 'USER:' + content + '\n'
+                if gpt_flag:
+                    save_r_content = 'AI:' + content + '\n'
+            else:
+                save_r_content = '(' + content_node_id + ')' + content
             # 开始一个事务
             pipe = api_key_manager.r.pipeline()
             # 将lpush操作添加到事务
