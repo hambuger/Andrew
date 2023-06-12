@@ -142,7 +142,7 @@ def deal_request_param():
     ip = request.json.get('ip') or client_ip
     userName = request.json.get('user_name') or 'default'
     if not message_id:
-        return None, None
+        return None, None, None, None, None
     return params, message_id, parent_id, userName, ip
 
 
