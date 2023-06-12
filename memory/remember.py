@@ -349,8 +349,8 @@ def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth,
                 save_r_content = '(' + content_node_id + ')' + content + '\n'
             # 开始一个事务
             pipe = api_key_manager.r.pipeline()
-            # 将lpush操作添加到事务
-            pipe.lpush(current_leaf_context_list_key, save_r_content)
+            # 将rpush操作添加到事务
+            pipe.rpush(current_leaf_context_list_key, save_r_content)
             # 尝试执行事务
             pipe.execute()
             # 如果事务成功执行，跳出循环
