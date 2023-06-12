@@ -161,7 +161,7 @@
               // 如果用户的输入不为空
               if (user_input) {
                   // 把用户的输入添加到对话框中
-                  var user_message = `<div class="message user"><img src="/static/user.png" class="avatar"><span class="text">${user_input}</span></div>`;
+                  var user_message = `<div class="message user"><img src="{{ proxy_path }}/static/user.png" class="avatar"><span class="text">${user_input}</span></div>`;
                   $("#content").append(user_message);
                   // 清空输入框的内容
                   $("#input").val("");
