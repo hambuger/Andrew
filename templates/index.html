@@ -169,7 +169,7 @@
                   $("#content").scrollTop($("#content")[0].scrollHeight);
                   // 使用AJAX向服务器发送请求
                   $.ajax({
-                      url: encodeURI("/input"), // 请求的URL
+                      url: encodeURI("{{ proxy_path }}/input"), // 请求的URL
                       type: "POST", // 请求的方法
                       data: {user_input: user_input}, // 请求的数据
                       dataType: "text", // 期望的响应数据类型
