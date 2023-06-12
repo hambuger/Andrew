@@ -377,3 +377,16 @@ def insert_extract_info_list(content_leaf_depth, content_owner, creator, creator
             insert_history(context_node_id, "0", creator_ip, content_owner, creator,
                            context["text"],
                            context_vector, content_leaf_depth + 1,context["p_ids"])
+
+
+def update_last_access_time(id_list):
+    if id_list:
+        for doc_id in id_list:
+            if not doc_id:
+                continue
+            body = {
+                "doc": {
+                    "content_last_access_time": datetime.now()
+                }
+            }
+            es.update(index='lang_chat_content', id=doc_id, body=body)
