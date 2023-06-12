@@ -1,5 +1,5 @@
 import json
-import logging
+from global_logger import logger
 import os
 import time
 from datetime import datetime
@@ -12,13 +12,10 @@ from openai_util.prompt import get_message_important_score,extract_information_f
 from openai_util.gpt4.stream_ship import chat_use_stream_ship
 from uuid import uuid4
 from openai_util.embedding import get_embedding
-from openai_util.msg_deal import sum_text_token
+from openai_util.token import sum_text_token
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(10)
-
-# 保存日志
-logger = logging.getLogger(__name__)
 
 
 def query_by_node_id(node_id_list):
@@ -99,7 +96,6 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                     ]
                 }
             },
-            "min_score": 2,
             "sort": [
                 {"content_leaf_depth": {"order": "desc"}},
                 "_score"
@@ -160,7 +156,6 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
                     ]
                 }
             },
-            "min_score": 2,
             "sort": [
                 {"content_leaf_depth": {"order": "desc"}},
                 "_score"
@@ -169,6 +164,84 @@ def query_vector_to_string(content, query_vector, content_owner, ip):
     else:
         logger.warning("query_vector_to_string: content_owner and ip are both None")
         return None
+    return es.search(index="lang_chat_content", body=query_body)
+
+
+def query_vector_to_string_v2(content, query_vector, content_owner, ip):
+    must_query = {}
+    if content_owner and content_owner != "default":
+        must_query = {"term": {"content_creator": content_owner}}
+    elif ip:
+        must_query = {"term": {"creator_ip": ip}}
+    else:
+        logger.warning("query_vector_to_string: content_owner and ip are both None")
+        return None
+    # 定义查询
+    query_body = {
+        "size": 3,
+        "query": {
+            "function_score": {
+                "query": {
+                    "bool": {
+                        "must": [
+                            must_query
+                        ]
+                    }
+                },
+                "functions": [
+                    {
+                        "filter": {
+                            "match": {
+                                "generated_content": content
+                            }
+                        },
+                        "script_score": {
+                            "script": {
+                                "source": "_score / (1 + _score)"
+                            }
+                        }
+                    },
+                    {
+                        "gauss": {
+                            "content_last_access_time": {
+                                "origin": "now",
+                                "scale": "24h",
+                                "offset": "1h",
+                                "decay": 0.5
+                            }
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "content_importance"
+                        }
+                    },
+                    {
+                        "script_score": {
+                            "script": {
+                                "source": "1 / (1 + Math.exp(-1.0 * doc['content_leaf_depth'].value))"
+                            }
+                        }
+                    },
+                    {
+                        "filter": {"match_all": {}},
+                        "script_score": {
+                            "script": {
+                                "source": "double score = (cosineSimilarity(params.query_vector, 'content_vector') + 1.0); return score > 0.5 ? 10 : 0;",
+                                "params": {
+                                    "query_vector": query_vector
+                                }
+                            }
+                        }
+                    }
+                ],
+                "score_mode": "sum",
+                "boost_mode": "replace",
+                "min_score": 10
+            }
+        }
+    }
+
     return es.search(index="lang_chat_content", body=query_body)
 
 
@@ -198,13 +271,15 @@ def get_msg_important_score(content):
 # 插入文档
 def get_leaf_sum_content_list(r_content_list):
     if r_content_list:
-        prompt = extract_information_from_messages(''.join(r_content_list))
-        extract_info_str = chat_use_stream_ship(prompt)
-        if extract_info_str:
-            try:
+        try:
+            prompt = extract_information_from_messages(''.join(r_content_list))
+            extract_info_str = chat_use_stream_ship(prompt)
+            logger.info("extract_info_str: %s", extract_info_str)
+            if extract_info_str:
                 return json.loads(extract_info_str)
-            except Exception:
-                return []
+        except Exception:
+            logger.exception("get_leaf_sum_content_list error")
+            return []
     else:
         return []
 
@@ -246,6 +321,7 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
         if not creator == 'default':
             try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag)
     except Exception as e:
+        logger.exception(e)
         logger.info(e)
 
 
@@ -257,18 +333,20 @@ def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth,
             # WATCH 列表和长度值
             api_key_manager.r.watch(current_leaf_context_list_key)
             r_content_list = api_key_manager.r.lrange(current_leaf_context_list_key, 0, -1)
+            r_content_list = [item.decode() for item in r_content_list]
             after_len = sum_text_token(r_content_list)
             # gpt4最大token为8000，留给gpt回答1000个，单次用户输入最大为3000token
             if after_len > 4000:
                 api_key_manager.r.delete(current_leaf_context_list_key)
                 executor.submit(insert_extract_info_list, content_leaf_depth, content_owner, creator,
                                 creator_ip, r_content_list)
+            save_r_content = ''
             if content_leaf_depth == 0:
-                save_r_content = 'USER:' + content + '\n'
+                save_r_content = '(' + content_node_id + ')' + 'USER:' + content + '\n'
                 if gpt_flag:
-                    save_r_content = 'AI:' + content + '\n'
+                    save_r_content = '(' + content_node_id + ')' + 'AI:' + content + '\n'
             else:
-                save_r_content = '(' + content_node_id + ')' + content
+                save_r_content = '(' + content_node_id + ')' + content + '\n'
             # 开始一个事务
             pipe = api_key_manager.r.pipeline()
             # 将lpush操作添加到事务
@@ -281,6 +359,9 @@ def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth,
             # 其他客户端改变了 WATCH 的键，事务被打断
             logger.warning("Concurrent modification, retrying...")
             time.sleep(1)  # 等待一秒然后重试
+        except Exception as e:
+            logger.exception(e)
+            break
         finally:
             api_key_manager.r.unwatch()  # 清除 WATCH
 

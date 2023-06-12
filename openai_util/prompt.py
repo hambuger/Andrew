@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 import os
 
@@ -17,7 +18,7 @@ def generateChagGPTPrompt2(result):
     # 将当前时间转换为字符串
     current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
     prompt = f"The chat records that appear between the first ```` and last ```` are from the past. \n \
-````{result}````\n Do not reveal in your reply if they are unuseful\nNow is {current_time_str}\n"
+````\n{result}````\n Do not reveal in your reply if they are unuseful\nNow is {current_time_str}\n"
     return prompt
 
 
@@ -74,12 +75,14 @@ AI:"""
 
 # 从上一层信息中提炼信息
 def extract_information_from_messages(messages):
+    summary = [{"text": "总结1", "p_ids": [1]}, {"text": "总结2", "p_ids": [2]}]
+    summary_json = json.dumps(summary)
     return f"""The ones between ```` below are past chat records.\n\
 These conversations cover a variety of topics, from the trivialities of everyday life to discussions on a variety of topics.\n\
 These memories may include your host's interests, opinions expressed in past conversations, important life events, and more.\n\
 Information similar to human long-term memory is extracted from these historical chat records.\n\
 You only need json data like this in your answer, make sure your answer can be parsed into json data correctly.\n\
-[{"text":"总结1","p_ids":[1]},{"text":"总结2","p_ids":[2]} ]\n\
+{summary_json}\n\
 Among them, text indicates the content of the summary and refinement. p_ids represents all the information sources that the abstract relies on, obtained from parentheses at the beginning of each conversation.\n\
 ````\n\
 {messages}\n\

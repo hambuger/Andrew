@@ -1,5 +1,4 @@
 from steamship import Steamship, SteamshipError
-from openai_util.prompt import get_message_important_score
 from util.redis.redis_client import api_key_manager
 
 

@@ -3,7 +3,7 @@ from flask import request, render_template, Blueprint, session
 import pandas as pd
 from openai import ChatCompletion, OpenAIError
 import uuid
-import logging
+from global_logger import logger
 from util.es.es import es, bulk_insert
 import json
 import numpy as np
@@ -17,9 +17,6 @@ from openai_util.prompt import get_excel_2_es_result_prompt, get_excel_2_es_mapp
 dataframe = None
 
 excel_route = Blueprint('excel', __name__)
-
-# 保存日志
-logger = logging.getLogger(__name__)
 
 
 def delete_indices_with_prefix(prefix):

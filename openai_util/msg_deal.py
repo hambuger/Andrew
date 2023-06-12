@@ -1,23 +1,14 @@
-import logging
+from global_logger import logger
 
-from memory.remember import query_vector_to_string, query_by_node_id
+from memory.remember import query_vector_to_string, query_vector_to_string_v2, query_by_node_id
 from openai_util.prompt import generateChagGPTPrompt2, generateChagGPTPrompt
 from openai_util.token import gpt_3_encoding as encoding
-
-logger = logging.getLogger(__name__)
 
 
 def sum_message_token(new_messages):
     tokens = 0
     for message in new_messages:
         tokens = tokens + len(encoding.encode(message["role"] + message["content"]))
-    return tokens
-
-
-def sum_text_token(text_list):
-    tokens = 0
-    for text in text_list:
-        tokens = tokens + len(text)
     return tokens
 
 
@@ -28,7 +19,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
         while length > 3000:
             messages = messages[len(messages) // 2:]
             length = sum_message_token(messages)
-        response = query_vector_to_string(content, content_vector, creator, ip)
+        response = query_vector_to_string_v2(content, content_vector, creator, ip)
         if response and response['hits']['total']['value'] == 0:
             return messages
         content_list = []
@@ -42,6 +33,10 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
         for j, hit2 in enumerate(nodeResponse['hits']['hits']):
             generated_content2 = hit2['_source'].get('generated_content', '')
             creator2 = hit2['_source'].get('content_creator', '')
+            if creator2 == 'gpt-3.5':
+                creator2 = "AI"
+            else:
+                creator2 = "USER"
             creatorTime = hit2['_source'].get('content_creation_time', '')
             content_list.append("(" + creatorTime + ") " + creator2 + ":" + generated_content2)
         result = ""
@@ -52,6 +47,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
                 break
 
         result = generateChagGPTPrompt2(result)
+        logger.info('generateChagGPTPrompt2: {}'.format(result))
         messages.insert(0, {'role': 'system', 'content': result})
         return messages
     except Exception as e:

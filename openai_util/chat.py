@@ -1,22 +1,20 @@
 import json
-import logging
+from global_logger import logger
 import os
 
 import openai
 from flask import request, Blueprint, Response
 from openai import OpenAIError
-
+from openai_util.prompt import get_hg_prompt
 from memory.remember import insert_history
 from openai_util.msg_deal import generate_messages_v3
 from util.redis.redis_client import api_key_manager
 from openai_util.embedding import get_embedding
 from concurrent.futures import ThreadPoolExecutor
 
-executor = ThreadPoolExecutor(10)
-
 chat_route = Blueprint('chat', __name__)
 
-logger = logging.getLogger(__name__)
+executor = ThreadPoolExecutor(10)
 
 
 @chat_route.route('/v1/models', methods=['GET'])
@@ -31,22 +29,27 @@ def model():
 
 
 @chat_route.route('/v1/chat/completions', methods=['POST'])
-def openai_chat_completions():
+def openai_chat_completions_for_web():
     try:
         # 获取传入参数
-        (params, message_id, parent_id) = deal_request_param()
-        # 保存聊天历史
-        (userName, ip) = add_message_record(params, message_id, parent_id)
-        # 在调用API时传入参数
-        response = openai.ChatCompletion.create(**params)
-        # 处理流式返回
-        return deal_stream_response(params, response, message_id, userName, ip)
+        (params, message_id, parent_id, userName, ip) = deal_request_param()
+        return openai_chat_completions(params, message_id, parent_id, userName, ip)
     except OpenAIError as e:
         logger.exception(e.message)
         return e.message
     except Exception as e:
         logger.exception("error: {}".format(e))
         return "未知错误，请联系hamburger"
+
+
+def openai_chat_completions(params, message_id, parent_id, user_name, ip):
+    stream_flag = params.get('stream')
+    # 保存聊天历史
+    add_message_record(params, message_id, parent_id, user_name, ip)
+    # 在调用API时传入参数
+    response = openai.ChatCompletion.create(**params)
+    # 处理流式返回
+    return deal_stream_response(stream_flag, response, message_id, user_name, ip)
 
 
 # 设置请求的api_key
@@ -63,21 +66,14 @@ def set_req_api_key(auth_info):
 
 
 # 插入用户的聊天记录
-def add_message_record(params, message_id, parent_id):
+def add_message_record(params, message_id, parent_id, user_name, ip):
     messages = params.get('messages')
-    client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
-    ip = request.json.get('ip') or client_ip
-    userName = request.json.get('user_name') or 'default'
-    if not message_id:
-        return None, None
     content = messages[-1].get("content")
     content_vector = get_embedding(content)
-    params['messages'] = generate_messages_v3(content, content_vector, userName, ip, messages)
+    params['messages'] = generate_messages_v3(content, content_vector, user_name, ip, messages)
     logger.info('messages: {}'.format(params['messages']))
     # 异步处理保存聊天记录
-    executor.submit(insert_history, message_id, parent_id, ip, userName, userName, content, content_vector, 0, [])
-    # 异步任务已启动，立即返回需要的值
-    return userName, ip
+    executor.submit(insert_history, message_id, parent_id, ip, user_name, user_name, content, content_vector, 0, [])
 
 
 # 插入GPT的返回记录
@@ -87,7 +83,7 @@ def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
 
 
 # 处理流式返回
-def deal_stream_response(params, response, parent_id, user_name, ip):
+def deal_stream_response(stream_flag, response, parent_id, user_name, ip):
     all_contents = []
     botMsgIds = []
 
@@ -99,7 +95,7 @@ def deal_stream_response(params, response, parent_id, user_name, ip):
             yield 'data: ' + json.dumps(chunk) + '\n\n'
         executor.submit(add_response_record, all_contents, botMsgIds, parent_id, ip, user_name)
 
-    if params.get('stream'):
+    if stream_flag:
         return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
     else:
         return response
@@ -142,4 +138,25 @@ def deal_request_param():
         # 如果获取到的字段值非 None，将其加入 params
         if field_value is not None:
             params[field] = field_value
-    return params, message_id, parent_id
+    client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
+    ip = request.json.get('ip') or client_ip
+    userName = request.json.get('user_name') or 'default'
+    if not message_id:
+        return None, None
+    return params, message_id, parent_id, userName, ip
+
+
+def hgchat(messages):
+    openai.api_key = api_key_manager.get_gh_chat_model_key()
+    try:
+        response = openai.Completion.create(
+            model=os.getenv("MY_CHAT_MODEL"),
+            prompt=get_hg_prompt(messages),
+            max_tokens=500,
+            temperature=0.4,
+            stop=["end"]
+        )
+        return response
+    except Exception as e:
+        logger.info("hgchat error" + str(e))
+        return None
