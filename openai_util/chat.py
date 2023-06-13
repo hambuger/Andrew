@@ -141,6 +141,7 @@ def deal_request_param():
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
     ip = request.json.get('ip') or client_ip
     userName = request.json.get('user_name') or 'default'
+    logger.info('ip: {}'.format(ip))
     if not message_id:
         return None, None, None, None, None
     return params, message_id, parent_id, userName, ip
