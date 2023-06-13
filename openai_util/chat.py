@@ -143,6 +143,7 @@ def deal_request_param():
     userName = request.json.get('user_name') or 'default'
     logger.info('ip: {}'.format(ip))
     if not message_id:
+        logger.warning('params error: {}'.format(params))
         return None, None, None, None, None
     return params, message_id, parent_id, userName, ip
 
