@@ -227,7 +227,7 @@ def query_vector_to_string_v2(content, query_vector, content_owner, ip):
                         "filter": {"match_all": {}},
                         "script_score": {
                             "script": {
-                                "source": "double score = (cosineSimilarity(params.query_vector, 'content_vector') + 1.0); return score > 0.5 ? 10 : 0;",
+                                "source": "double score = (cosineSimilarity(params.query_vector, 'content_vector') + 1.0); return score > 0.5 ? 10 + score : 0;",
                                 "params": {
                                     "query_vector": query_vector
                                 }
