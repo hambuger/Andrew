@@ -17,7 +17,7 @@ chat_route = Blueprint('chat', __name__)
 executor = ThreadPoolExecutor(10)
 
 
-@chat_route.route('/v1/models', methods=['GET'])
+# @chat_route.route('/v1/models', methods=['GET'])
 def model():
     auth_info = request.headers.get('Authorization')
     set_req_api_key(auth_info)
