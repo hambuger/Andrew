@@ -1,5 +1,5 @@
 import json
-from global_logger import logger
+from config.global_logger import logger
 import os
 import time
 from datetime import datetime
@@ -12,7 +12,7 @@ from openai_util.prompt import get_message_important_score,extract_information_f
 from openai_util.gpt4.stream_ship import chat_use_stream_ship
 from uuid import uuid4
 from openai_util.embedding import get_embedding
-from openai_util.token import sum_text_token
+from openai_util.sum_token import sum_text_token
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(10)
@@ -227,7 +227,7 @@ def query_vector_to_string_v2(content, query_vector, content_owner, ip):
                         "filter": {"match_all": {}},
                         "script_score": {
                             "script": {
-                                "source": "double score = (cosineSimilarity(params.query_vector, 'content_vector') + 1.0); return score > 0.5 ? 10 : 0;",
+                                "source": "double score = (cosineSimilarity(params.query_vector, 'content_vector') + 1.0); return score > 0.5 ? 10 + score : 0;",
                                 "params": {
                                     "query_vector": query_vector
                                 }
@@ -377,3 +377,16 @@ def insert_extract_info_list(content_leaf_depth, content_owner, creator, creator
             insert_history(context_node_id, "0", creator_ip, content_owner, creator,
                            context["text"],
                            context_vector, content_leaf_depth + 1,context["p_ids"])
+
+
+def update_last_access_time(id_list):
+    if id_list:
+        for doc_id in id_list:
+            if not doc_id:
+                continue
+            body = {
+                "doc": {
+                    "content_last_access_time": datetime.now()
+                }
+            }
+            es.update(index='lang_chat_content', id=doc_id, body=body)

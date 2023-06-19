@@ -1,5 +1,5 @@
 import json
-from global_logger import logger
+from config.global_logger import logger
 import os
 
 import openai
@@ -17,7 +17,7 @@ chat_route = Blueprint('chat', __name__)
 executor = ThreadPoolExecutor(10)
 
 
-@chat_route.route('/v1/models', methods=['GET'])
+# @chat_route.route('/v1/models', methods=['GET'])
 def model():
     auth_info = request.headers.get('Authorization')
     set_req_api_key(auth_info)
@@ -141,8 +141,10 @@ def deal_request_param():
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
     ip = request.json.get('ip') or client_ip
     userName = request.json.get('user_name') or 'default'
+    logger.info('ip: {}'.format(ip))
     if not message_id:
-        return None, None
+        logger.warning('params error: {}'.format(params))
+        return None, None, None, None, None
     return params, message_id, parent_id, userName, ip
 
 

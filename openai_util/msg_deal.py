@@ -1,8 +1,11 @@
-from global_logger import logger
+from config.global_logger import logger
 
-from memory.remember import query_vector_to_string, query_vector_to_string_v2, query_by_node_id
+from memory.remember import query_vector_to_string, query_vector_to_string_v2, query_by_node_id, update_last_access_time
 from openai_util.prompt import generateChagGPTPrompt2, generateChagGPTPrompt
-from openai_util.token import gpt_3_encoding as encoding
+from openai_util.sum_token import gpt_3_encoding as encoding
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(10)
 
 
 def sum_message_token(new_messages):
@@ -24,10 +27,13 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
             return messages
         content_list = []
         node_id_list = []
+        update_node_ids = []
         for i, hit in enumerate(response['hits']['hits']):
             # 将其按照需要的格式添加到列表中
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
+            update_node_ids.append(hit['_id'])
+        executor.submit(update_last_access_time, update_node_ids)
         node_id_list = list(filter(None, node_id_list))
         nodeResponse = query_by_node_id(node_id_list)
         for j, hit2 in enumerate(nodeResponse['hits']['hits']):
