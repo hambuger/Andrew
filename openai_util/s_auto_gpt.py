@@ -134,4 +134,4 @@ def run_conversation_v2(user_content):
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
 
 
-# print(run_conversation_v2("杭州天气好的话,打电话给hamburger"))
+# run_conversation_v2("杭州天气好的话,打电话给han")
