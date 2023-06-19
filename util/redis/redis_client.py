@@ -5,7 +5,7 @@ import redis
 
 
 class ApiKeyManager:
-    def __init__(self, redis_host=os.getenv("REDIS_HOST"), redis_port=os.getenv("REDIS_PORT"), db=0):
+    def __init__(self, redis_host=os.getenv("REDIS_HOST"), redis_port=os.getenv("REDIS_PORT", "6379"), db=0):
         self.r = redis.Redis(host=redis_host, port=int(redis_port), db=db)
 
         self.lua = """
