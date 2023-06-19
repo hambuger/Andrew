@@ -1,5 +1,5 @@
 import json
-from global_logger import logger
+from config.global_logger import logger
 import os
 
 import openai

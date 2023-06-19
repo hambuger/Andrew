@@ -3,7 +3,7 @@ from flask import request, render_template, Blueprint, session
 import pandas as pd
 from openai import ChatCompletion, OpenAIError
 import uuid
-from global_logger import logger
+from config.global_logger import logger
 from util.es.es import es, bulk_insert
 import json
 import numpy as np

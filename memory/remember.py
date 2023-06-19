@@ -1,5 +1,5 @@
 import json
-from global_logger import logger
+from config.global_logger import logger
 import os
 import time
 from datetime import datetime
@@ -12,7 +12,7 @@ from openai_util.prompt import get_message_important_score,extract_information_f
 from openai_util.gpt4.stream_ship import chat_use_stream_ship
 from uuid import uuid4
 from openai_util.embedding import get_embedding
-from openai_util.token import sum_text_token
+from openai_util.sum_token import sum_text_token
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(10)
