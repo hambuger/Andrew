@@ -115,7 +115,7 @@ def deal_request_param():
         api_key = api_key_manager.get_openai_key()
     openai.api_key = api_key
     # 获取接口参数
-    req_model = request.json.get('model')
+    req_model = request.json.get('model') or os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo')
     messages_req = request.json.get('messages')
     message_id = messages_req[-1].get('id')
     parent_id = None

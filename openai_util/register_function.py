@@ -18,13 +18,13 @@ def register(function_info):
 
 @register({
     "name": "get_current_weather",
-    "description": "获取某个地点的天气情况",
+    "description": "Get the weather conditions for a location",
     "parameters": {
         "type": "object",
         "properties": {
             "location": {
                 "type": "string",
-                "description": "地点名称",
+                "description": "place name",
             },
             "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
         },
@@ -43,13 +43,13 @@ def get_current_weather(location, unit="celsius"):
 
 @register({
     "name": "get_map_navigation",
-    "description": "获取到达目的地路线",
+    "description": "Get directions to destination",
     "parameters": {
         "type": "object",
         "properties": {
             "destination": {
                 "type": "string",
-                "description": "目的地名称"
+                "description": "destination name"
             }
         },
         "required": ["destination"]
@@ -64,13 +64,13 @@ def get_map_navigation(args):
 
 @register({
     "name": "call_someone",
-    "description": "给联系人打电话",
+    "description": "call someone",
     "parameters": {
         "type": "object",
         "properties": {
             "name": {
                 "type": "string",
-                "description": "要拨打的联系人名称"
+                "description": "The name of the contact to call"
             }
         },
         "required": ["name"]
@@ -79,7 +79,7 @@ def get_map_navigation(args):
 def call_someone(someone):
     call_result = {
         "success": True,
-        "message": "拨打" + someone['name'] + "成功"
+        "message": "call " + someone['name'] + " success"
     }
     return call_result
 
@@ -87,7 +87,7 @@ def call_someone(someone):
 def do_step_by_step():
     return {
         "name": "do_step_by_step",
-        "description": "按照用户指令一步步执行操作",
+        "description": "Perform operations step by step according to user instructions",
         "parameters": {
             "type": "object",
             "properties": {
@@ -98,16 +98,16 @@ def do_step_by_step():
                         "properties": {
                             "step_order": {
                                 "type": "integer",
-                                "description": "执行操作的顺序"
+                                "description": "The order in which operations are performed"
                             },
                             "step_method": {
                                 "type": "string",
-                                "description": "要执行的操作对应的方法名",
+                                "description": "The method name corresponding to the operation to be performed",
                                 "enum": list(FUNCTIONS.keys())
                             },
                             "step_desc": {
                                 "type": "string",
-                                "description": "要执行的操作描述，原子化的操作"
+                                "description": "Description of the operation to be performed, atomic operation"
                             }
                         },
                         "required": ["step_order", "step_method", "step_desc"]
@@ -127,13 +127,13 @@ def get_invoke_method_info_by_name(function_name):
     if function_name == 'get_invoke_method_info':
         all_method_info = {
             "name": "get_invoke_method_info",
-            "description": "获取应该调用的方法",
+            "description": "Get the method that should be called",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "function_name": {
                         "type": "string",
-                        "description": "应该调用的方法名",
+                        "description": "The method name that should be called",
                     },
                     "unit": {"type": "string", "enum": list(FUNCTIONS.keys())},
                 },

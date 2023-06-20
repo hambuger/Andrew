@@ -250,7 +250,7 @@ def chat_with_single_msg(content):
     try:
         prompt_msg = get_message_important_score(content)
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo'),
             messages=[{'role': 'user', 'content': prompt_msg}],
             temperature=0,
         )

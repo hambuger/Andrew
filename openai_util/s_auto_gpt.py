@@ -48,7 +48,7 @@ def get_function_result_from_openai_response(response):
         message.get("function_call")
         function_name = message["function_call"]["name"]
         function_args = message["function_call"]["arguments"]
-        logger.info("调用方法：" + function_name + " 参数：" + str(function_args))
+        logger.info("invoke method：" + function_name + " args：" + str(function_args))
         return function_name, invoke_function(function_name, function_args)
 
 
@@ -114,6 +114,7 @@ def run_single_step_chat(messages, functions):
 
 
 def run_conversation_v2(user_content):
+    # Analyze the user's instructions into detailed operation steps through chatgpt
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
                                            "auto")
@@ -123,15 +124,16 @@ def run_conversation_v2(user_content):
         return message['content']
     function_args = message["function_call"]["arguments"]
     steps = json.loads(function_args)['steps']
-    # 根据step_order正序排序
+    # order by step_order asc
     steps.sort(key=lambda x: x['step_order'])
     messages = [{"role": "system",
                  "content": "You are an advanced robot, and you can do almost anything that humans ask you to do."},
                 {"role": "user", "content": user_content}]
+    # loop through each step
     for index, step in enumerate(steps):
         order_step_response = run_single_step_chat(messages, [get_invoke_method_info_by_name(step['step_method'])])
         logger.info(
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
 
 
-# run_conversation_v2("杭州天气好的话,打电话给han")
+# run_conversation_v2("if the weather in hangzhou is fine, call han")
