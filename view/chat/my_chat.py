@@ -46,7 +46,7 @@ def chat(message_id, user_name, ip):
     openai.api_key = api_key_manager.get_openai_key()
     try:
         params = {
-            "model": "gpt-3.5-turbo",
+            "model": os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo'),
             "messages": session['history']
         }
         return openai_chat_completions(params, message_id, "0", user_name, ip)
