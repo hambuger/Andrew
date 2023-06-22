@@ -4,7 +4,7 @@ from openai import OpenAIError
 import os
 from util.redis.redis_client import api_key_manager
 from config.global_logger import logger
-from openai_util.openai_functions import invoke_function, get_invoke_method_info_by_name, do_step_by_step
+from openai_util.function_call.funcation_invoke import invoke_function, get_invoke_method_info_by_name, do_step_by_step
 
 
 def create_chat_completion(user_content, function_msg, functions=None, function_call=None):
@@ -118,6 +118,7 @@ def run_conversation_v2(user_content):
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
                                            "auto")
+    print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
         logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
@@ -136,4 +137,4 @@ def run_conversation_v2(user_content):
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
 
 
-# run_conversation_v2("if the weather in hangzhou is fine, call han")
+run_conversation_v2("杭州天气好的话，打电话给han")

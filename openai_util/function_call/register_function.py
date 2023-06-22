@@ -1,4 +1,4 @@
-from openai_functions import FUNCTIONS
+from openai_util.function_call.funcation_invoke import FUNCTIONS
 
 
 def register(function_info):
@@ -78,12 +78,3 @@ def call_someone(someone):
         "message": "call " + someone['name'] + " success"
     }
     return call_result
-
-
-
-
-
-
-
-
-

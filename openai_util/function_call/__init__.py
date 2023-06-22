@@ -1,0 +1,3 @@
+# 初始化时加载类
+import openai_util.function_call.register_function
+import openai_util.function_call.openaifunc_decorator

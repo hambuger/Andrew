@@ -2,7 +2,7 @@ import inspect
 import functools
 import importlib.util
 import re
-from openai_functions import FUNCTIONS
+from openai_util.function_call.funcation_invoke import FUNCTIONS
 
 # Map python types to JSON schema types
 type_mapping = {
