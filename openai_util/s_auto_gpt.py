@@ -4,7 +4,7 @@ from openai import OpenAIError
 import os
 from util.redis.redis_client import api_key_manager
 from config.global_logger import logger
-from openai_util.register_function import invoke_function, get_invoke_method_info_by_name, do_step_by_step
+from openai_util.openai_functions import invoke_function, get_invoke_method_info_by_name, do_step_by_step
 
 
 def create_chat_completion(user_content, function_msg, functions=None, function_call=None):
