@@ -51,9 +51,9 @@ def get_current_weather(location, unit="celsius"):
         "required": ["destination"]
     },
 })
-def get_map_navigation(args):
+def get_map_navigation(destination):
     return {
-        "destination": args['destination'],
+        "destination": destination,
         "way": "如果你在附近城市，可以选择乘坐高铁到达杭州。杭州有多个高铁站，包括杭州东站、杭州站和杭州南站等。到达高铁站后，你可以通过地铁、出租车或公共汽车等方式前往目的地"
     }
 
@@ -72,9 +72,9 @@ def get_map_navigation(args):
         "required": ["name"]
     },
 })
-def call_someone(someone):
+def call_someone(name):
     call_result = {
         "success": True,
-        "message": "call " + someone['name'] + " success"
+        "message": "call " + name + " success"
     }
     return call_result
