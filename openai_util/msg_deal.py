@@ -1,7 +1,7 @@
 from config.global_logger import logger
 
 from memory.remember import query_vector_to_string, query_vector_to_string_v2, query_by_node_id, update_last_access_time
-from openai_util.prompt import generateChagGPTPrompt2, generateChagGPTPrompt
+from openai_util.prompt import generateChagGPTPrompt3, generateChagGPTPrompt
 from openai_util.sum_token import gpt_3_encoding as encoding
 from concurrent.futures import ThreadPoolExecutor
 
@@ -52,8 +52,8 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
             if length > 3000:
                 break
 
-        result = generateChagGPTPrompt2(result)
-        logger.info('generateChagGPTPrompt2: {}'.format(result))
+        result = generateChagGPTPrompt3(result)
+        logger.info('generateChagGPTPrompt3: {}'.format(result))
         messages.insert(0, {'role': 'system', 'content': result})
         return messages
     except Exception as e:
