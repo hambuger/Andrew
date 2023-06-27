@@ -76,11 +76,13 @@ def run_conversation_v1(user_content):
 def create_chat_completion_with_msg(new_msg, functions):
     try:
         if not functions:
+            openai.api_key = api_key_manager.get_openai_key()
             return openai.ChatCompletion.create(
                 model=os.getenv('GET_METHOD_ARGUMENTS_MODEL', 'gpt-3.5-turbo-0613'),
                 messages=new_msg,
                 temperature=0
             )
+        openai.api_key = api_key_manager.get_openai_key()
         return openai.ChatCompletion.create(
             model=os.getenv('GET_METHOD_ARGUMENTS_MODEL', 'gpt-3.5-turbo-0613'),
             messages=new_msg,
@@ -118,10 +120,10 @@ def run_conversation_v2(user_content):
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
                                            "auto")
-    print([do_step_by_step()])
+    # print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
-        logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
+        # logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
         return message['content']
     function_args = message["function_call"]["arguments"]
     steps = json.loads(function_args)['steps']
@@ -131,10 +133,18 @@ def run_conversation_v2(user_content):
                  "content": "You are an advanced robot, and you can do almost anything that humans ask you to do."},
                 {"role": "user", "content": user_content}]
     # loop through each step
+    order_step_response = None
     for index, step in enumerate(steps):
         order_step_response = run_single_step_chat(messages, [get_invoke_method_info_by_name(step['step_method'])])
-        logger.info(
-            "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
+        # logger.info(
+        #     "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
+    if order_step_response:
+        return order_step_response["choices"][0]["message"]['content']
+    else:
+        return '出错了'
 
 
-run_conversation_v2("杭州天气好的话，打电话给han")
+# print(run_conversation_v2("导航到杭州"))
+# print(run_conversation_v2("如果杭州天气好的话，打电话给gongqi"))
+# print(run_conversation_v2(
+#     "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80  这个图片里车的品牌是什么"))

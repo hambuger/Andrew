@@ -8,9 +8,9 @@ def invoke_function(function_name, arguments):
     function = FUNCTIONS.get(function_name).get('method')
     if function:
         try:
-            return function(json.loads(arguments))
-        except json.JSONDecodeError as e:
-            logger.error(f"Error while decoding arguments to json: {e}")
+            return function(**json.loads(arguments))
+        except BaseException as e:
+            logger.error(f"Error while decoding arguments to json: {e}, arguments:{arguments}")
             if arguments:
                 return function(arguments)
             else:
