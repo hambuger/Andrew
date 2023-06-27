@@ -52,7 +52,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
             if length > 3000:
                 break
 
-        result = generateChagGPTPrompt3(result)
+        result = generateChagGPTPrompt3(result, creator)
         logger.info('generateChagGPTPrompt3: {}'.format(result))
         messages.insert(0, {'role': 'system', 'content': result})
         return messages
