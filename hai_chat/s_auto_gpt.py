@@ -103,6 +103,7 @@ def run_single_step_chat(messages, functions):
         function_name, function_result = get_function_result_from_openai_response(get_arguments_response)
         if not function_name:
             return get_arguments_response
+        new_msg.append(get_arguments_response["choices"][0]["message"])
         new_msg.append({"role": "function", "name": function_name,
                         "content": json.dumps(function_result)})
         final_response = create_chat_completion_with_msg(new_msg,
@@ -119,13 +120,14 @@ def run_conversation_v2(user_content):
     # Analyze the user's instructions into detailed operation steps through chatgpt
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
-                                           "auto")
+                                           {"name": "do_step_by_step"})
     # print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
         # logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
         return message['content']
     function_args = message["function_call"]["arguments"]
+    logger.info("response:{}".format(json.loads(function_args)))
     steps = json.loads(function_args)['steps']
     # order by step_order asc
     steps.sort(key=lambda x: x['step_order'])
@@ -136,8 +138,8 @@ def run_conversation_v2(user_content):
     order_step_response = None
     for index, step in enumerate(steps):
         order_step_response = run_single_step_chat(messages, [get_invoke_method_info_by_name(step['step_method'])])
-        # logger.info(
-        #     "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
+        logger.info(
+            "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
     if order_step_response:
         return order_step_response["choices"][0]["message"]['content']
     else:
@@ -148,3 +150,4 @@ def run_conversation_v2(user_content):
 # print(run_conversation_v2("如果杭州天气好的话，打电话给gongqi"))
 # print(run_conversation_v2(
 #     "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80  这个图片里车的品牌是什么"))
+# print(run_conversation_v2("放一首七里香"))

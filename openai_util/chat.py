@@ -122,10 +122,10 @@ def deal_request_param():
     if len(messages_req) > 1:
         parent_id = messages_req[-2].get('id')
     # 处理前端传入的特殊信息
-    messages = [{k: v for k, v in msg.items() if k in ['role', 'content']} for msg in messages_req]
+    messages = [{k: v for k, v in msg.items() if k in ['role', 'content', 'function_call']} for msg in messages_req]
     # 存储所有需要检查的字段的名字
     fields_to_check = ['logit_bias', 'temperature', 'top_p', 'n', 'stream', 'stop', 'max_tokens', 'presence_penalty',
-                       'frequency_penalty', 'user']
+                       'frequency_penalty', 'user', 'functions']
     # 准备API调用的必要参数
     params = {
         'model': req_model,

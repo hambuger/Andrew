@@ -30,7 +30,7 @@ processor = AutoProcessor.from_pretrained("Salesforce/blip-vqa-base")
 
 
 @openai_func
-def answer_by_image_url(image_url: str, prompt: str):
+def answer_by_image_url_and_text(image_url: str, prompt: str):
     """
     Answer according to the user's description and picture url
 
@@ -41,3 +41,8 @@ def answer_by_image_url(image_url: str, prompt: str):
     image = Image.open(requests.get(image_url, stream=True).raw)
     inputs = processor(images=image, text=prompt, return_tensors="pt")
     return processor.decode(model.generate(**inputs, max_length=4000)[0], skip_special_tokens=True)
+
+
+# print(answer_by_image_url(
+#     "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
+#     "这个图片里车的品牌是什么"))
