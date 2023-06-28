@@ -15,7 +15,7 @@ from config.global_logger import logger
 load_dotenv()
 # 创建Recognizer和Microphone实例
 r = sr.Recognizer()
-mic = sr.Microphone(device_index=2)
+mic = sr.Microphone(device_index=1)
 
 # 创建ASR执行器
 asr = ASRExecutor()

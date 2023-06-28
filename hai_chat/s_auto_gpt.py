@@ -120,7 +120,7 @@ def run_conversation_v2(user_content):
     # Analyze the user's instructions into detailed operation steps through chatgpt
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
-                                           {"name": "do_step_by_step"})
+                                           "auto")
     # print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
