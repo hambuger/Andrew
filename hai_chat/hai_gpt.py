@@ -60,22 +60,21 @@ while True:
         result = openai.Audio.transcribe("whisper-1", wav_date, language="zh")["text"]
         logger.info(f"识别语音：{result}")
     if not result:
+        # 如果一段时间没有检测到有效的输入，就进入待机状态
+        if time.time() - last_input_time > idle_timeout:
+            logger.info("暂时休眠")
+            audio_status = 0
         continue
     if '再见' in result:
         logger.info("Bye!")
         audio_status = 0
         subprocess.run(["say", "再见"])
         continue
-    last_input_time = time.time()
-    response = run_conversation_v2(result)
-    if not response.choices:
+    answer = run_conversation_v2(result)
+    if not answer:
         continue
-    answer = response.choices[0].message["content"]
     logger.info(f"AI回复：{answer}")
     subprocess.run(["say", answer])
     # 删除临时文件
+    last_input_time = time.time()
     os.remove(temp_file_path)
-    # 如果一段时间没有检测到有效的输入，就进入待机状态
-    if time.time() - last_input_time > idle_timeout:
-        logger.info("暂时休眠")
-        audio_status = 0

@@ -43,6 +43,7 @@ def play_song(song_name):
     play_button.click()
     time.sleep(3)  # 暂停 3 秒
     element = driver.find_elements(By.CLASS_NAME, "songlist__time")
+    driver.minimize_window()
     time_str = element[0].text
     # 分割字符串并转换成秒
     minutes, seconds = map(int, time_str.split(":"))
@@ -50,4 +51,5 @@ def play_song(song_name):
     time.sleep(total_seconds)
     driver.quit()
 
-# play_song_with_qq_music("六月的雨")
+
+# play_song("六月的雨")
