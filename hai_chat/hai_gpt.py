@@ -65,7 +65,7 @@ while True:
             logger.info("暂时休眠")
             audio_status = 0
         continue
-    if '再见' in result:
+    if '再见' in result or '再見' in result:
         logger.info("Bye!")
         audio_status = 0
         file_2_audio("再见", True)
