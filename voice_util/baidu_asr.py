@@ -11,4 +11,9 @@ class ApiAsr(VoiceAsr):
         return asr(audio_file=voice_file, force_yes=True)
 
 
-# print(ApiAsr().asr_voice("/Users/hamburger/Documents/AI/music/output.wav"))
+# begin = time.time()
+# print(ApiAsr().asr_voice(r"C:\Users\Administrator\Desktop\share\output.wav") + "耗时：" + str(time.time() - begin))
+# begin = time.time()
+# print(ApiAsr().asr_voice(r"C:\Users\Administrator\Desktop\share\zh.wav") + "耗时：" + str(time.time() - begin))
+# begin = time.time()
+# print(ApiAsr().asr_voice(r"C:\Users\Administrator\Desktop\share\gongqi_1.wav") + "耗时：" + str(time.time() - begin))
