@@ -9,7 +9,7 @@ from paddlespeech.cli.asr.infer import ASRExecutor
 from dotenv import load_dotenv
 from hai_chat.s_auto_gpt import run_conversation_v2
 from config.global_logger import logger
-from voice_util.voice_tts import file_2_audio
+from voice_util.voice_tts import text_2_audio
 
 # 加载配置文件
 load_dotenv()
@@ -68,13 +68,13 @@ while True:
     if '再见' in result or '再見' in result:
         logger.info("Bye!")
         audio_status = 0
-        file_2_audio("再见", True)
+        text_2_audio("再见", True)
         continue
     answer = run_conversation_v2(result)
     if not answer:
         continue
     logger.info(f"AI回复：{answer}")
-    file_2_audio(answer, True)
+    text_2_audio(answer, True)
     # 删除临时文件
     last_input_time = time.time()
     os.remove(temp_file_path)

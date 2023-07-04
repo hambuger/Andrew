@@ -1,20 +1,19 @@
-from paddlespeech.cli.tts.infer import TTSExecutor
-
 import os
+import pyttsx3
 import subprocess
 
-tts = TTSExecutor()
+# 初始化语音引擎
+engine = pyttsx3.init()
+# 获取所有可用的语音
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
 
 
-def file_2_audio(text, output="output.wav", voice_play=False):
-    tts(am="fastspeech2_male", voc="pwgan_male", text=text, output=output, use_onnx=True)
+def text_2_audio(text, voice_play=False):
+    # tts(am="fastspeech2_male", voc="pwgan_male", text=text, output=output, use_onnx=True)
     if voice_play:
-        os_name = os.getenv('os_name', 'macos')
+        os_name = os.getenv('os_name', 'windows')
         if os_name == 'macos':
             subprocess.run(["say", text])
         else:
-            import sounddevice as sd
-            import soundfile as sf
-            data, fs = sf.read(output)
-            sd.play(data, fs)
-            sd.wait()
+            engine.say(text)
