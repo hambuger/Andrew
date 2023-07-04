@@ -17,3 +17,4 @@ def text_2_audio(text, voice_play=False):
             subprocess.run(["say", text])
         else:
             engine.say(text)
+            engine.runAndWait()
