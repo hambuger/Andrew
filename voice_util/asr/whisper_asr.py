@@ -1,7 +1,7 @@
 import openai
 
 from util.redis.redis_client import api_key_manager
-from voice_util.voice_asr import VoiceAsr
+from voice_util.asr.voice_asr import VoiceAsr
 
 
 class WhisperAsr(VoiceAsr):

@@ -1,7 +1,7 @@
 import json
 from functools import lru_cache
 
-from voice_util.voice_asr import VoiceAsr
+from voice_util.asr.voice_asr import VoiceAsr
 import wave
 import requests
 

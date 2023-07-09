@@ -1,7 +1,8 @@
 /app.log
 /log.txt
 .env
-
+*.log
+audio.wav
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

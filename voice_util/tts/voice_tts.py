@@ -9,12 +9,11 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
 
-def text_2_audio(text, voice_play=False):
+def text_2_audio(text):
     # tts(am="fastspeech2_male", voc="pwgan_male", text=text, output=output, use_onnx=True)
-    if voice_play:
-        os_name = os.getenv('os_name', 'windows')
-        if os_name == 'macos':
-            subprocess.run(["say", text])
-        else:
-            engine.say(text)
-            engine.runAndWait()
+    os_name = os.getenv('os_name', 'windows')
+    if os_name == 'macos':
+        subprocess.run(["say", text])
+    else:
+        engine.say(text)
+        engine.runAndWait()

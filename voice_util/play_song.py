@@ -21,11 +21,11 @@ def play_song_with_qq_music(song_name: str):
 
 def play_song(song_name):
     options = webdriver.ChromeOptions()
-    options.add_argument("user-data-dir=/Users/hamburger/Documents/web_driver_chrome")
+    options.add_argument(r"user-data-dir=D:\Python\Tools\chromedriver_win32\data")
     options.add_argument("--start-maximized")  # 最大化窗口
     options.add_argument("--no-sandbox")  # 禁用沙箱
     options.add_argument("--disable-dev-shm-usage")  # 禁用开发者模式
-    driver_path = '/Users/hamburger/Documents/AI/tool/chromedriver'
+    driver_path = r'D:\Python\Tools\chromedriver_win32\chromedriver'
     webdriver_service = Service(driver_path)
     driver = webdriver.Chrome(service=webdriver_service, options=options)
     # 导航到 QQ 音乐

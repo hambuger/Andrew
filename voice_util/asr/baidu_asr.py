@@ -1,4 +1,4 @@
-from voice_util.voice_asr import VoiceAsr
+from voice_util.asr.voice_asr import VoiceAsr
 from paddlespeech.cli.asr.infer import ASRExecutor
 
 asr = ASRExecutor()
