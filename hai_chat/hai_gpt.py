@@ -1,7 +1,10 @@
 import time
+from dotenv import load_dotenv
+
+# 加载配置文件
+load_dotenv()
 
 import speech_recognition as sr
-from dotenv import load_dotenv
 from paddlespeech.cli.asr.infer import ASRExecutor
 
 from config.global_logger import logger
@@ -23,6 +26,7 @@ last_input_time = 0
 
 audio_active = False
 file_path = 'audio.wav'
+parent_id = '0'
 while True:
     audio_active = get_audio(audio_active, file_path, last_input_time)
     result = None
@@ -36,9 +40,12 @@ while True:
     if '再见' in result or '再見' in result:
         logger.info("Bye!")
         audio_active = False
+        parent_id = '0'
         text_2_audio("再见")
         continue
-    answer = run_conversation_v2(result)
+    (answer, msg_Id) = run_conversation_v2(result, parent_id)
+    if msg_Id:
+        parent_id = msg_Id
     if not answer:
         continue
     logger.info(f"AI回复：{answer}")

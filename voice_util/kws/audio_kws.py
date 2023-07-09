@@ -65,11 +65,11 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
         chunk = stream.read(CHUNK_SIZE)
         active = vad.is_speech(chunk, RATE)
         ring_buffer.append((chunk, active))
-        print("active: ", active)
+        # print("active: ", active)
         if not triggered:
             num_voiced = len([chunk for chunk, active in ring_buffer if active])
-            print("1 num_voiced: ", num_voiced)
-            print("1 len(ring_buffer): ", len(ring_buffer))
+            # print("1 num_voiced: ", num_voiced)
+            # print("1 len(ring_buffer): ", len(ring_buffer))
             if num_voiced > 0.5 * len(ring_buffer):
                 print('Triggered')
                 triggered = True
@@ -81,8 +81,8 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             voiced_frames.append(chunk)
 
             num_unvoiced = len([chunk for chunk, active in ring_buffer if not active])
-            print("2 num_unvoiced: ", num_unvoiced)
-            print("2 len(ring_buffer): ", len(ring_buffer))
+            # print("2 num_unvoiced: ", num_unvoiced)
+            # print("2 len(ring_buffer): ", len(ring_buffer))
             if num_unvoiced > 0.9 * len(ring_buffer):  # 减小这个值
                 print('Voice end detected')
                 got_a_sentence = True

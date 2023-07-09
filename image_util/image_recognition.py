@@ -28,8 +28,8 @@ from openai_util.function_call.openaifunc_decorator import openai_func
 
 translator = Translator(to_lang='en', from_lang='zh')
 
-model = BlipForQuestionAnswering.from_pretrained("Salesforce/blip-vqa-base")
-processor = AutoProcessor.from_pretrained("Salesforce/blip-vqa-base")
+model = None
+processor = None
 
 
 @openai_func
@@ -46,6 +46,11 @@ def answer_by_image_url_and_text(image: str, prompt: str):
     # blob = TextBlob(prompt)
     # print(blob.translate(to="en"))
     # print(translator.translate(prompt))
+    global model, processor
+    if not model:
+        model = BlipForQuestionAnswering.from_pretrained("Salesforce/blip-vqa-base")
+    if not processor:
+        processor = AutoProcessor.from_pretrained("Salesforce/blip-vqa-base")
     image = Image.open(image)
     inputs = processor(images=image, text=translator.translate(prompt), return_tensors="pt")
     return processor.decode(model.generate(**inputs, max_length=4000)[0], skip_special_tokens=True)

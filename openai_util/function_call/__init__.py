@@ -4,3 +4,5 @@ from openai_util.function_call import funcation_invoke, openaifunc_decorator, re
 from image_util import image_recognition, picture_get
 # 播放音乐
 from voice_util.play_song import play_song_with_qq_music
+# 搜索
+from info_util.google_serper import query_info_from_google
