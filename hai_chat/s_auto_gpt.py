@@ -73,8 +73,12 @@ def run_conversation_v1(user_content):
     return final_response
 
 
-def create_chat_completion_with_msg(new_msg, functions):
+def create_chat_completion_with_msg(new_msg, functions, func_name=None):
     try:
+        if func_name:
+            functon_call = {"name": func_name}
+        else:
+            functon_call = "auto"
         if not functions:
             openai.api_key = api_key_manager.get_openai_key()
             return openai.ChatCompletion.create(
@@ -87,7 +91,7 @@ def create_chat_completion_with_msg(new_msg, functions):
             model=os.getenv('GET_METHOD_ARGUMENTS_MODEL', 'gpt-3.5-turbo-0613'),
             messages=new_msg,
             functions=functions,
-            function_call="auto",
+            function_call=functon_call,
             temperature=0
         )
     except OpenAIError as e:
@@ -95,22 +99,26 @@ def create_chat_completion_with_msg(new_msg, functions):
         return None
 
 
-def run_single_step_chat(messages, functions):
+def run_single_step_chat(index, messages, functions, func_name):
     try:
+        messages.append({"role": "user", "content": "now you are in step {}".format(index)})
         new_msg = list(messages)
-        get_arguments_response = create_chat_completion_with_msg(new_msg, functions)
+        get_arguments_response = create_chat_completion_with_msg(new_msg, functions, func_name)
         # logger.info("get_arguments_response:{}".format(json.dumps(get_arguments_response)))
         function_name, function_result = get_function_result_from_openai_response(get_arguments_response)
+        logger.info("function_name:{}, function_result:{}".format(function_name, function_result))
         if not function_name:
-            return get_arguments_response
+            return get_arguments_response, json.dumps(function_result)
         new_msg.append(get_arguments_response["choices"][0]["message"])
         new_msg.append({"role": "function", "name": function_name,
                         "content": json.dumps(function_result)})
         final_response = create_chat_completion_with_msg(new_msg,
                                                          None)
-        # logger.info("final_response:{}".format(json.dumps(final_response)))
+        logger.info("final_response:{}".format(json.dumps(final_response)))
         messages.append(final_response["choices"][0]["message"])
-        return final_response
+        messages.append(
+            {"role": "assistant", "content": "the result of step {} is: {}".format(index, json.dumps(function_result))})
+        return final_response, json.dumps(function_result)
     except OpenAIError as e:
         logger.exception(e)
         return None
@@ -121,10 +129,10 @@ def run_conversation_v2(user_content):
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
                                            "auto")
-    # print([do_step_by_step()])
+    print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
-        # logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
+        logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
         return message['content']
     function_args = message["function_call"]["arguments"]
     logger.info("response:{}".format(json.loads(function_args)))
@@ -132,19 +140,21 @@ def run_conversation_v2(user_content):
     # order by step_order asc
     steps.sort(key=lambda x: x['step_order'])
     messages = [{"role": "system",
-                 "content": "You are an advanced robot, and you can do almost anything that humans ask you to do."},
-                {"role": "user", "content": user_content}]
+                 "content": "You are an advanced robot, and you can do almost anything that humans ask you to do." +
+                            "Please answer the user with Chinese"},
+                {"role": "user", "content": user_content},
+                {"role": "user", "content": "Follow the steps below:" + json.dumps(steps)}]
     # loop through each step
     order_step_response = None
     for index, step in enumerate(steps):
-        order_step_response = run_single_step_chat(messages, [get_invoke_method_info_by_name(step['step_method'])])
+        order_step_response, function_result = run_single_step_chat(index, messages, [
+            get_invoke_method_info_by_name(step['step_method'])], step['step_method'])
         logger.info(
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
     if order_step_response:
         return order_step_response["choices"][0]["message"]['content']
     else:
         return '出错了'
-
 
 # print(run_conversation_v2("导航到杭州"))
 # print(run_conversation_v2("如果杭州天气好的话，打电话给gongqi"))
