@@ -23,7 +23,7 @@ CHUNK_BYTES = CHUNK_SIZE * 2
 NUM_PADDING_CHUNKS = int(PADDING_DURATION_MS / CHUNK_DURATION_MS)
 NUM_WINDOW_CHUNKS = int(400 / CHUNK_DURATION_MS)  # 增大这个值
 
-vad = webrtcvad.Vad(3)  # 提高VAD敏感度
+vad = webrtcvad.Vad(0)  # 提高VAD敏感度
 
 pa = pyaudio.PyAudio()
 stream = pa.open(format=FORMAT,
@@ -38,7 +38,7 @@ model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
 porcupine = pvporcupine.create(
     access_key=picovoice_access_key,
-    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_windows_v2_2_0.ppn'), os.path.join(model_dir, '安德鲁_zh_windows_v2_2_1.ppn')],
+    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_windows_v2_2_0.ppn')],
     model_path=os.path.join(model_dir, 'porcupine_params_zh.pv'),
 )
 
