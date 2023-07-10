@@ -6,3 +6,5 @@ from image_util import image_recognition, picture_get, play_video
 from voice_util.play_song import play_song_with_qq_music
 # 搜索
 from info_util.google_serper import query_info_from_google
+# 打电话
+from phone_util.call_util import call_someone

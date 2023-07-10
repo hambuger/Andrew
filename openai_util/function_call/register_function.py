@@ -57,24 +57,3 @@ def get_map_navigation(destination):
         "way": "如果你在附近城市，可以选择乘坐高铁到达杭州。杭州有多个高铁站，包括杭州东站、杭州站和杭州南站等。到达高铁站后，你可以通过地铁、出租车或公共汽车等方式前往目的地"
     }
 
-
-@register({
-    "name": "call_someone",
-    "description": "call someone",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "name": {
-                "type": "string",
-                "description": "The name of the contact to call"
-            }
-        },
-        "required": ["name"]
-    },
-})
-def call_someone(name):
-    call_result = {
-        "success": True,
-        "message": "call " + name + " success"
-    }
-    return call_result
