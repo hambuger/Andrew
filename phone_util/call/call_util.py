@@ -21,7 +21,19 @@ phone_os_name = os.getenv('PHONE_OS_NAME', 'android')
 
 def call(name):
     if phone_os_name == 'android':
-        return
+        if not cli_setup():
+            auto_setup(__file__, logdir=True, devices=[
+                "android://127.0.0.1:5037/P7CDU18119007423?cap_method=MINICAP&touch_method=MAXTOUCH&", ])
+
+        # script content
+        print("start...")
+        home()
+        touch(Template(r"tpl1689084639899.png", record_pos=(0.121, 0.849), resolution=(1080, 2160)))
+        touch(Template(r"tpl1689084670345.png", record_pos=(-0.12, 0.922), resolution=(1080, 2160)))
+        touch(Template(r"tpl1689084693131.png", record_pos=(-0.219, -0.481), resolution=(1080, 2160)))
+        text(name)
+        touch((150, 460))
+        touch(Template(r"tpl1689084903469.png", record_pos=(0.269, 0.042), resolution=(1080, 2160)))
     elif phone_os_name == 'ios':
         # import subprocess
         # def start_iproxy(local_port, device_port):
