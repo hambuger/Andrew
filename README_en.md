@@ -10,10 +10,10 @@ How to start the web version:
 Complete ai assistant function experience entrance:
 > hai_chat/hai_chat.py
 
-Goal of this project
+Goal of this project  
 This project aims to achieve artificial intelligence with human memory level. On the basis of this memory, the performance of artificial intelligence is further improved.
 
-Implemented functions
+
 This project implements the following functions:
 
 1. Continuous dialogue: Realize continuous dialogue interaction with users.
