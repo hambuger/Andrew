@@ -91,10 +91,11 @@ env/
 # mypy
 .mypy_cache/
 .dmypy.json
-dmypy.json
+dmypy.jsonFIX
 
 # Pycharm, VS Code
 .idea
 .vscode
-*/exp/log/
+*/log/
 */temp.jpg
+*\log
