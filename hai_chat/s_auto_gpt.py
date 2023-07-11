@@ -148,7 +148,7 @@ def run_conversation_v2(user_content, parent_id):
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
         logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
-        insert_ai_response_record(user_content, step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default'))
+        insert_ai_response_record(message['content'], step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default'))
         return message['content'], step_response["id"]
     function_args = message["function_call"]["arguments"]
     logger.info("response:{}".format(json.loads(function_args)))
@@ -168,7 +168,7 @@ def run_conversation_v2(user_content, parent_id):
         logger.info(
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
     if order_step_response:
-        insert_ai_response_record(user_content, order_step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default')
+        insert_ai_response_record(order_step_response["choices"][0]["message"]['content'], order_step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default')
                                   )
         return order_step_response["choices"][0]["message"]['content'], order_step_response["id"]
     else:

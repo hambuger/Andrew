@@ -25,8 +25,7 @@ def call(name):
             auto_setup(__file__, logdir=True, devices=[
                 "android://127.0.0.1:5037/P7CDU18119007423?cap_method=MINICAP&touch_method=MAXTOUCH&", ])
 
-        # script content
-        print("start...")
+        wake()
         home()
         touch(Template(r"tpl1689084639899.png", record_pos=(0.121, 0.849), resolution=(1080, 2160)))
         touch(Template(r"tpl1689084670345.png", record_pos=(-0.12, 0.922), resolution=(1080, 2160)))
