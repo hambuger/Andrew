@@ -8,3 +8,5 @@ from voice_util.play_song import play_song_with_qq_music
 from info_util.google_serper import query_info_from_google
 # 打电话
 from phone_util.call.call_util import call_someone
+# 查询天气
+from info_util.weather_query import get_weather
