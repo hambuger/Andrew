@@ -44,12 +44,13 @@ def openai_chat_completions_for_web():
 
 def openai_chat_completions(params, message_id, parent_id, user_name, ip):
     stream_flag = params.get('stream')
+    function_call = params.get('function_call')
     # 保存聊天历史
     add_message_record(params, message_id, parent_id, user_name, ip)
     # 在调用API时传入参数
     response = openai.ChatCompletion.create(**params)
     # 处理流式返回
-    return deal_stream_response(stream_flag, response, message_id, user_name, ip)
+    return deal_stream_response(function_call, stream_flag, response, message_id, user_name, ip)
 
 
 # 设置请求的api_key
@@ -82,8 +83,13 @@ def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
     insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), content_vector, 0, [])
 
 
+def insert_ai_response_record(content, msg_id, parent_id, ip, user_name):
+    content_vector = get_embedding(content)
+    insert_history(msg_id, parent_id, ip, user_name, 'gpt-3.5', content, content_vector, 0, [])
+
+
 # 处理流式返回
-def deal_stream_response(stream_flag, response, parent_id, user_name, ip):
+def deal_stream_response(function_call, stream_flag, response, parent_id, user_name, ip):
     all_contents = []
     botMsgIds = []
 
@@ -98,6 +104,10 @@ def deal_stream_response(stream_flag, response, parent_id, user_name, ip):
     if stream_flag:
         return Response(stream_response(), mimetype='application/octet-stream', content_type='application/json')
     else:
+        if not function_call:
+            executor.submit(insert_ai_response_record, response['choices'][0]['message']['content'], response['id'],
+                            parent_id,
+                            ip, user_name)
         return response
 
 

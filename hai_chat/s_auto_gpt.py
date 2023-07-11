@@ -6,10 +6,11 @@ import os
 from util.redis.redis_client import api_key_manager
 from config.global_logger import logger
 from openai_util.function_call.funcation_invoke import invoke_function, get_invoke_method_info_by_name, do_step_by_step
-from openai_util.chat import openai_chat_completions
+from openai_util.chat import openai_chat_completions, insert_ai_response_record
 
 
-def create_chat_completion(user_content, function_msg, functions=None, function_call=None, parent_id='0'):
+def create_chat_completion(user_content, function_msg, functions=None, function_call=None, message_id='0',
+                           parent_id='0'):
     try:
         openai.api_key = api_key_manager.get_openai_key()
         use_model = os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo')
@@ -27,8 +28,8 @@ def create_chat_completion(user_content, function_msg, functions=None, function_
             # )
             return openai_chat_completions(params={"model": use_model,
                                                    "messages": messages,
-                                                   "temperature": 0}, message_id='audio_chat-' + str(uuid.uuid4()),
-                                           parent_id=parent_id, user_name="韩家宝",
+                                                   "temperature": 0}, message_id=message_id,
+                                           parent_id=parent_id, user_name=os.getenv('MY_NAME', 'default'),
                                            ip="127.0.0.1")
         use_model = os.getenv('GET_INVOKE_METHOD_MODEL', 'gpt-3.5-turbo-16k')
         # return openai.ChatCompletion.create(
@@ -41,8 +42,8 @@ def create_chat_completion(user_content, function_msg, functions=None, function_
         return openai_chat_completions(params={"model": use_model,
                                                "messages": messages, "functions": functions,
                                                "function_call": function_call,
-                                               "temperature": 0}, message_id='audio_chat-' + str(uuid.uuid4()),
-                                       parent_id=parent_id, user_name="韩家宝",
+                                               "temperature": 0}, message_id=message_id,
+                                       parent_id=parent_id, user_name=os.getenv('MY_NAME', 'default'),
                                        ip="127.0.0.1")
     except OpenAIError as e:
         logger.info(f"user_content: {user_content}, function_msg: {function_msg}, functions: {functions}")
@@ -139,13 +140,15 @@ def run_single_step_chat(index, messages, functions, func_name):
 
 def run_conversation_v2(user_content, parent_id):
     # Analyze the user's instructions into detailed operation steps through chatgpt
+    message_id = 'audio_chat-' + str(uuid.uuid4())
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
-                                           "auto", parent_id)
+                                           "auto", message_id, parent_id)
     print([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
         logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
+        insert_ai_response_record(user_content, step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default'))
         return message['content'], step_response["id"]
     function_args = message["function_call"]["arguments"]
     logger.info("response:{}".format(json.loads(function_args)))
@@ -165,6 +168,8 @@ def run_conversation_v2(user_content, parent_id):
         logger.info(
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
     if order_step_response:
+        insert_ai_response_record(user_content, order_step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default')
+                                  )
         return order_step_response["choices"][0]["message"]['content'], order_step_response["id"]
     else:
         return '出错了', None
