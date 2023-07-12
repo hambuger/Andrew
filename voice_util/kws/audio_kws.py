@@ -8,6 +8,7 @@ import pvporcupine
 import pyaudio
 import webrtcvad
 from dotenv import load_dotenv
+
 # 加载配置文件
 load_dotenv()
 
@@ -38,7 +39,7 @@ model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
 porcupine = pvporcupine.create(
     access_key=picovoice_access_key,
-    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + 'macos' + '_v2_2_0.ppn')],
+    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + os.getenv('os_name') + '_v2_2_0.ppn')],
     model_path=os.path.join(model_dir, 'porcupine_params_zh.pv'),
 )
 
@@ -124,4 +125,3 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 break
     keyword_detected = False
     return audio_active
-
