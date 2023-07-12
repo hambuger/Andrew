@@ -7,9 +7,12 @@ Complete ai assistant function experience entrance:
 How to experience the web version:
 > flask run
 
-Goal of this project  
-This project aims to achieve artificial intelligence with human memory level. On the basis of this memory, the performance of artificial intelligence is further improved.
-
+This project aims to achieve artificial intelligence with human memory level. On the basis of this memory, the performance of artificial intelligence is further improved. The goals are as follows:
+1. The artificial intelligence can pass the Turing test, and it is in various forms of information exchange, including text, voice, video, pictures, etc.
+2. The artificial intelligence can control various devices, including but not limited to mobile phones, computers, smart homes, smart vehicles, etc.
+3. The artificial intelligence can obtain information through various means, including but not limited to networks, sensors, cameras, microphones, GPS, etc.
+4. The artificial intelligence can port the code to any platform and device, including but not limited to mobile phones, computers, smart homes, smart vehicles, etc.
+5. The artificial intelligence can continuously improve its abilities through learning and memory, including but not limited to language ability, control ability, information acquisition ability, etc.
 
 This project implements the following functions:
 
