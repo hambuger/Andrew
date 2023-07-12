@@ -1,13 +1,11 @@
 # HAI-GPT
 [English Version MD](README_en.md)
-## 如何使用本项目
-网页版启动方式：
-```bash
-./run_flask.sh
-````
 
 完整的ai助手功能体验入口:  
-> hai_chat/hai_chat.py
+> python andrew_chat.py
+
+网页版体验方式：
+> flask run
 
 
 本项目旨在实现具有人类记忆水平的人工智能。在这种记忆的基础上，进一步提升人工智能的性能。
@@ -36,3 +34,4 @@
 8.查询各地天气  
 9.通过airtest实现调用手机拨打电话  
 10.根据系统不同来决定调用音乐播放方式  
+11.使用WolframAlpha查询

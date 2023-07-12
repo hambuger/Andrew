@@ -1,14 +1,11 @@
 # HAI-GPT
 [中文版本](README.md)
-## How to Use This Project
-How to start the web version:
-
-```bash
-./run_flask.sh
-````
 
 Complete ai assistant function experience entrance:
-> hai_chat/hai_chat.py
+> python andrew_chat.py
+
+How to experience the web version:
+> flask run
 
 Goal of this project  
 This project aims to achieve artificial intelligence with human memory level. On the basis of this memory, the performance of artificial intelligence is further improved.
@@ -38,3 +35,4 @@ This project implements the following functions:
 8. Check the weather in various places
 9. Call the mobile phone to make a call through airtest
 10. Depending on the system to decide how to call music playback
+11. query using WolframAlpha
