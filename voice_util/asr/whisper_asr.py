@@ -1,6 +1,6 @@
 import openai
 
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 from voice_util.asr.voice_asr import VoiceAsr
 
 

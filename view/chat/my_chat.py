@@ -10,7 +10,7 @@ from flask import request, render_template, Blueprint, session
 # 导入logging模块
 from config.global_logger import logger as logging
 from openai_util.chat import openai_chat_completions
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 
 my_chat_route = Blueprint('my_chat', __name__)
 

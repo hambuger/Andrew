@@ -4,13 +4,13 @@ import pandas as pd
 from openai import ChatCompletion, OpenAIError
 import uuid
 from config.global_logger import logger
-from util.es.es import es, bulk_insert
+from database_util.es.es import es, bulk_insert
 import json
 import numpy as np
 import math
 import threading
 import time
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 from openai_util.prompt import get_excel_2_es_result_prompt, get_excel_2_es_mapping_prompt_v2
 
 # 存储上传的Excel文件的数据

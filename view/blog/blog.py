@@ -4,7 +4,7 @@ import os
 
 from flask import request, Blueprint
 
-from util.es.es import query_data_by_id_or_parent_id
+from database_util.es.es import query_data_by_id_or_parent_id
 
 blog_route = Blueprint('blog', __name__)
 

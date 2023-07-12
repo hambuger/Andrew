@@ -8,7 +8,7 @@ from openai import OpenAIError
 from openai_util.prompt import get_hg_prompt
 from memory.remember import insert_history
 from openai_util.msg_deal import generate_messages_v3
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 from openai_util.embedding import get_embedding
 from concurrent.futures import ThreadPoolExecutor
 
