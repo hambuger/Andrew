@@ -14,7 +14,7 @@ load_dotenv()
 # 设置一些参数
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
-RATE = 16000
+RATE = 16000 if os.getenv('os_name') == 'windows' else 48000
 CHUNK_DURATION_MS = 30  # 每个音频块的毫秒数
 PADDING_DURATION_MS = 1000  # 静默持续时间，以毫秒为单位
 CHUNK_SIZE = int(RATE * CHUNK_DURATION_MS / 1000)
@@ -38,7 +38,7 @@ model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
 porcupine = pvporcupine.create(
     access_key=picovoice_access_key,
-    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_windows_v2_2_0.ppn')],
+    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + 'macos' + '_v2_2_0.ppn')],
     model_path=os.path.join(model_dir, 'porcupine_params_zh.pv'),
 )
 

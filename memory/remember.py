@@ -6,8 +6,8 @@ from datetime import datetime
 import openai
 from redis.exceptions import WatchError
 
-from util.es.es import es
-from util.redis.redis_client import api_key_manager
+from database_util.es.es import es
+from database_util.redis.redis_client import api_key_manager
 from openai_util.prompt import get_message_important_score,extract_information_from_messages
 from openai_util.gpt4.stream_ship import chat_use_stream_ship
 from uuid import uuid4

@@ -8,7 +8,7 @@ import speech_recognition as sr
 from paddlespeech.cli.asr.infer import ASRExecutor
 
 from config.global_logger import logger
-from hai_chat.s_auto_gpt import run_conversation_v2
+from openai_util.s_auto_gpt import run_conversation_v2
 from voice_util.kws.audio_kws import get_audio
 from voice_util.tts.voice_tts import text_2_audio
 

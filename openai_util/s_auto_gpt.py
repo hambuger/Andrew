@@ -3,7 +3,7 @@ import uuid
 import openai
 from openai import OpenAIError
 import os
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 from config.global_logger import logger
 from openai_util.function_call.funcation_invoke import invoke_function, get_invoke_method_info_by_name, do_step_by_step
 from openai_util.chat import openai_chat_completions, insert_ai_response_record

@@ -1,5 +1,5 @@
 import openai
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 import numpy as np
 
 

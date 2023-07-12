@@ -1,5 +1,5 @@
 from steamship import Steamship, SteamshipError
-from util.redis.redis_client import api_key_manager
+from database_util.redis.redis_client import api_key_manager
 
 
 def get_generator():

@@ -2,11 +2,7 @@ import os
 import pyttsx3
 import subprocess
 
-# 初始化语音引擎
-engine = pyttsx3.init()
-# 获取所有可用的语音
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[0].id)
+engine = None
 
 
 def text_2_audio(text):
@@ -15,5 +11,12 @@ def text_2_audio(text):
     if os_name == 'macos':
         subprocess.run(["say", text])
     else:
+        global engine
+        if not engine:
+            # 初始化语音引擎
+            engine = pyttsx3.init()
+            # 获取所有可用的语音
+            voices = engine.getProperty('voices')
+            engine.setProperty('voice', voices[0].id)
         engine.say(text)
         engine.runAndWait()
