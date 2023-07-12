@@ -12,3 +12,5 @@ from phone_util.call.call_util import call_someone
 from info_util.weather_query import get_weather
 # python代码运行
 from code_util.run_python import run_python_code
+# wolframalpha
+from info_util.wolfram_alpha_util import query_wolframalpha
