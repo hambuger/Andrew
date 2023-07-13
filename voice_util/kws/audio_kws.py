@@ -130,10 +130,12 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                     else:
                         # 没有获取到锁，有人在使用
                         print("Device did not acquire the lock. Another device is responding.")
+                        audio_active = False
                         continue
                 elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
                     # 有人在使用，不要打扰
                     print("Device did not acquire the lock. Another device is responding2.")
+                    audio_active = False
                     continue
                 # write to a wav file
                 wf = wave.open(file_path, 'wb')
