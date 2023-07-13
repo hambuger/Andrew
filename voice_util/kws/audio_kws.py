@@ -130,7 +130,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                         break
                 elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
                     # 有人在使用，不要打扰
-                    print("Device did not acquire the lock. Another device is responding.")
+                    print("Device did not acquire the lock. Another device is responding2.")
                 # write to a wav file
                 wf = wave.open(file_path, 'wb')
                 wf.setnchannels(CHANNELS)

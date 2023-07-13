@@ -11,12 +11,12 @@ from openai_util.chat import openai_chat_completions, insert_ai_response_record
 
 def push_message(message):
     json_item = json.dumps(message)  # 将字典转换为JSON字符串
-    api_key_manager.lpush('AUDIO_CHAT_HISTORY', json_item)
-    api_key_manager.ltrim('AUDIO_CHAT_HISTORY', 0, 5)
+    api_key_manager.r.lpush('AUDIO_CHAT_HISTORY', json_item)
+    api_key_manager.r.ltrim('AUDIO_CHAT_HISTORY', 0, 5)
 
 
 def get_recent_chat_history():
-    byte_list = api_key_manager.lrange('AUDIO_CHAT_HISTORY', 0, -1)
+    byte_list = api_key_manager.r.lrange('AUDIO_CHAT_HISTORY', 0, -1)
     return [json.loads(item.decode('utf-8')) for item in byte_list]
 
 
