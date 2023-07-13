@@ -2,31 +2,25 @@ import collections
 import os
 import time
 import wave
-
+from scipy.signal import resample
 import numpy as np
 import pvporcupine
 import pyaudio
 import webrtcvad
-from dotenv import load_dotenv
-
-# 加载配置文件
-load_dotenv()
 
 # 设置一些参数
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
-RATE = 16000 if os.getenv('os_name') == 'windows' else 48000
 CHUNK_DURATION_MS = 30  # 每个音频块的毫秒数
 PADDING_DURATION_MS = 1000  # 静默持续时间，以毫秒为单位
-CHUNK_SIZE = int(RATE * CHUNK_DURATION_MS / 1000)
 
-CHUNK_BYTES = CHUNK_SIZE * 2
 NUM_PADDING_CHUNKS = int(PADDING_DURATION_MS / CHUNK_DURATION_MS)
-NUM_WINDOW_CHUNKS = int(400 / CHUNK_DURATION_MS)  # 增大这个值
-
-vad = webrtcvad.Vad(0)  # 提高VAD敏感度
+# 0 是最不敏感（即最少报告语音活动），3 是最敏感（即最多报告语音活动）
+vad = webrtcvad.Vad(3)  # 提高VAD敏感度
 
 pa = pyaudio.PyAudio()
+RATE = int(pa.get_default_input_device_info()["defaultSampleRate"]) or 16000
+CHUNK_SIZE = int(RATE * CHUNK_DURATION_MS / 1000)
 stream = pa.open(format=FORMAT,
                  channels=CHANNELS,
                  rate=RATE,
@@ -42,18 +36,19 @@ porcupine = pvporcupine.create(
     keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + os.getenv('os_name') + '_v2_2_0.ppn')],
     model_path=os.path.join(model_dir, 'porcupine_params_zh.pv'),
 )
-
+# 是否一次语音结束
 got_a_sentence = False
 
+# 唤醒监听的窗口大小
 ring_buffer = collections.deque(maxlen=NUM_PADDING_CHUNKS)
+# 是否有监听到语音
 triggered = False
+# 保存音频帧的缓冲区
 voiced_frames = []
-
+# 是否检测到关键词
 keyword_detected = False
-triggered = False
 # 记录最后一次检测到有效输入的时间
 last_input_time = 0
-
 # 如果一段时间内没有检测到有效的输入，就进入待机状态
 idle_timeout = 30
 
@@ -63,7 +58,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
     if last_time != 0:
         last_input_time = last_time
     while True:
-        chunk = stream.read(CHUNK_SIZE)
+        chunk = stream.read(CHUNK_SIZE, exception_on_overflow=False)
         active = vad.is_speech(chunk, RATE)
         ring_buffer.append((chunk, active))
         # print("active: ", active)
@@ -99,12 +94,16 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             if not audio_active:
                 # 将数据转换为16位PCM样本的numpy数组
                 pcm_data = np.frombuffer(data, dtype=np.int16)
-
+                if RATE != 16000:
+                    # 重采样为 16kHz
+                    original_duration = len(pcm_data) / RATE
+                    pcm_data = resample(pcm_data, num=int(original_duration * 16000))
                 # 遍历所有的块，并处理每个块
                 for i in range(0, len(pcm_data), porcupine.frame_length):
                     pcm_chunk = pcm_data[i:i + porcupine.frame_length]
                     # 确保块的长度是正确的
                     if len(pcm_chunk) == porcupine.frame_length:
+                        pcm_chunk = pcm_chunk.astype(np.int16)
                         result = porcupine.process(pcm_chunk)
                         if result >= 0:
                             keyword_detected = True
