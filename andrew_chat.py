@@ -35,7 +35,7 @@ while True:
             parent_id = '0'
             text_2_audio("再见")
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
-                api_key_manager.delete('AUDIO_KEY')
+                api_key_manager.delete_key('AUDIO_KEY')
             continue
         push_message({"role": "user", "content": result})
         (answer, msg_Id) = run_conversation_v2(result, parent_id)
@@ -54,4 +54,4 @@ while True:
         continue
     finally:
         if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
-            api_key_manager.delete('AUDIO_KEY')
+            api_key_manager.delete_key('AUDIO_KEY')
