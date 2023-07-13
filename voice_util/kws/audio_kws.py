@@ -16,7 +16,7 @@ PADDING_DURATION_MS = 1000  # 静默持续时间，以毫秒为单位
 
 NUM_PADDING_CHUNKS = int(PADDING_DURATION_MS / CHUNK_DURATION_MS)
 # 0 是最不敏感（即最少报告语音活动），3 是最敏感（即最多报告语音活动）
-vad = webrtcvad.Vad(0)  # 提高VAD敏感度
+vad = webrtcvad.Vad(0)
 
 pa = pyaudio.PyAudio()
 RATE = int(pa.get_default_input_device_info()["defaultSampleRate"]) or 16000
@@ -28,6 +28,7 @@ stream = pa.open(format=FORMAT,
                  start=True,
                  frames_per_buffer=CHUNK_SIZE)
 
+# 这个key不是用来接口调用的，而是用来一次性验证身份的
 picovoice_access_key = 'oH7xQFgfFONcVY2ll3a7p07sxBBvZqd6dy116lzeig4a2UGmE0+EtQ=='
 model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
@@ -123,4 +124,3 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 wf.close()
                 break
     keyword_detected = False
-    return audio_active

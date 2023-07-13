@@ -1,35 +1,23 @@
 import time
-from dotenv import load_dotenv
-
-# 加载配置文件
-load_dotenv()
-
-import speech_recognition as sr
-from paddlespeech.cli.asr.infer import ASRExecutor
-
 from config.global_logger import logger
+from paddlespeech.cli.asr.infer import ASRExecutor
 from openai_util.s_auto_gpt import run_conversation_v2
 from voice_util.kws.audio_kws import get_audio
 from voice_util.tts.voice_tts import text_2_audio
-
-# 加载配置文件
-load_dotenv()
-# 创建Recognizer和Microphone实例
-r = sr.Recognizer()
-mic = sr.Microphone()
 
 # 创建ASR执行器
 asr = ASRExecutor()
 
 # 记录最后一次检测到有效输入的时间
 last_input_time = 0
-
+# 是否激活了语音对话
 audio_active = False
+# 默认音频文件路径
 file_path = 'audio.wav'
+# 记录上一次对话回应消息的ID
 parent_id = '0'
 while True:
-    audio_active = get_audio(audio_active, file_path, last_input_time)
-    result = None
+    get_audio(audio_active, file_path, last_input_time)
     # 执行ASR并打印结果
     result = asr(model='conformer_wenetspeech', audio_file=file_path, force_yes=True)
     logger.info(f"识别语音：{result}")
