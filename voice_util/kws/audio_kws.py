@@ -16,7 +16,7 @@ PADDING_DURATION_MS = 1000  # 静默持续时间，以毫秒为单位
 
 NUM_PADDING_CHUNKS = int(PADDING_DURATION_MS / CHUNK_DURATION_MS)
 # 0 是最不敏感（即最少报告语音活动），3 是最敏感（即最多报告语音活动）
-vad = webrtcvad.Vad(3)  # 提高VAD敏感度
+vad = webrtcvad.Vad(0)  # 提高VAD敏感度
 
 pa = pyaudio.PyAudio()
 RATE = int(pa.get_default_input_device_info()["defaultSampleRate"]) or 16000
