@@ -20,7 +20,10 @@ NUM_PADDING_CHUNKS = int(PADDING_DURATION_MS / CHUNK_DURATION_MS)
 vad = webrtcvad.Vad(0)
 
 pa = pyaudio.PyAudio()
-RATE = int(pa.get_default_input_device_info()["defaultSampleRate"]) or 16000
+RATE = int(pa.get_default_input_device_info()["defaultSampleRate"])
+# 如果采样率 不在8000 16000 32000 48000中，就设置采样率为16000
+if RATE not in [8000, 16000, 32000, 48000]:
+    RATE = 16000
 CHUNK_SIZE = int(RATE * CHUNK_DURATION_MS / 1000)
 stream = pa.open(format=FORMAT,
                  channels=CHANNELS,
@@ -127,10 +130,11 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                     else:
                         # 没有获取到锁，有人在使用
                         print("Device did not acquire the lock. Another device is responding.")
-                        break
+                        continue
                 elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
                     # 有人在使用，不要打扰
                     print("Device did not acquire the lock. Another device is responding2.")
+                    continue
                 # write to a wav file
                 wf = wave.open(file_path, 'wb')
                 wf.setnchannels(CHANNELS)
