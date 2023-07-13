@@ -7,6 +7,7 @@ import numpy as np
 import pvporcupine
 import pyaudio
 import webrtcvad
+from database_util.redis.redis_client import api_key_manager
 
 # 设置一些参数
 FORMAT = pyaudio.paInt16
@@ -89,6 +90,8 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
         if time.time() - last_input_time > idle_timeout:
             audio_active = False
             keyword_detected = False
+            if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
+                api_key_manager.delete_key('AUDIO_KEY')
         if got_a_sentence:
             print('Processing sentence')
             data = b''.join(voiced_frames)
@@ -115,6 +118,19 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             # 如果检测到关键词，保存文件
             if audio_active or keyword_detected:
                 print("Wake up!")
+                keyword_detected = False
+                if not api_key_manager.get_key_value('AUDIO_KEY'):
+                    # 没有人在使用，尝试获取锁
+                    if api_key_manager.set_nx_key('AUDIO_KEY', os.getenv('os_name'), 60 * 1000):
+                        # 获取到锁，可以使用
+                        print("Device acquired the lock.")
+                    else:
+                        # 没有获取到锁，有人在使用
+                        print("Device did not acquire the lock. Another device is responding.")
+                        break
+                elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
+                    # 有人在使用，不要打扰
+                    print("Device did not acquire the lock. Another device is responding.")
                 # write to a wav file
                 wf = wave.open(file_path, 'wb')
                 wf.setnchannels(CHANNELS)
@@ -123,4 +139,3 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 wf.writeframes(data)
                 wf.close()
                 break
-    keyword_detected = False

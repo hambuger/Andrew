@@ -92,5 +92,11 @@ class ApiKeyManager:
             return None
         return self.r.get(key).decode()
 
+    def set_nx_key(self, key, value, lock_timeout_ms=60 * 1000):
+        self.r.set(key, value, nx=True, px=lock_timeout_ms)
+
+    def delete_key(self, key):
+        self.r.delete(key)
+
 
 api_key_manager = ApiKeyManager()
