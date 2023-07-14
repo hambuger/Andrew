@@ -16,7 +16,7 @@ def call_someone(name: str):
     return "正在呼叫：{}".format(name)
 
 
-phone_os_name = os.getenv('PHONE_OS_NAME', 'android')
+phone_os_name = os.getenv('PHONE_OS_NAME', 'ios')
 
 
 def call(name):
@@ -42,7 +42,7 @@ def call(name):
         # # 开启 iproxy
         # iproxy_process = start_iproxy(8100, 8100)
         if not cli_setup():
-            auto_setup(__file__, logdir=True, devices=["ios:///127.0.0.01:8100"])
+            auto_setup(__file__, logdir=True, devices=["ios:///127.0.0.1:8100"])
         home()
         touch(Template(r"tpl1689055883401.png", record_pos=(-0.346, 0.929), resolution=(1170, 2532)))
         touch(Template(r"tpl1689055924886.png", record_pos=(0.002, 0.934), resolution=(1170, 2532)))
