@@ -72,7 +72,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             # print("1 num_voiced: ", num_voiced)
             # print("1 len(ring_buffer): ", len(ring_buffer))
             if num_voiced > 0.5 * len(ring_buffer):
-                print('Triggered')
+                # print('Triggered')
                 triggered = True
                 voiced_frames.extend([chunk for chunk, _ in ring_buffer])
                 ring_buffer.clear()
@@ -85,7 +85,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             # print("2 num_unvoiced: ", num_unvoiced)
             # print("2 len(ring_buffer): ", len(ring_buffer))
             if num_unvoiced > 0.9 * len(ring_buffer):  # 减小这个值
-                print('Voice end detected')
+                # print('Voice end detected')
                 got_a_sentence = True
                 triggered = False
                 ring_buffer.clear()
@@ -96,7 +96,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
                 api_key_manager.delete_key('AUDIO_KEY')
         if got_a_sentence:
-            print('Processing sentence')
+            # print('Processing sentence')
             data = b''.join(voiced_frames)
             if not audio_active:
                 # 将数据转换为16位PCM样本的numpy数组
@@ -114,27 +114,28 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                         result = porcupine.process(pcm_chunk)
                         if result >= 0:
                             keyword_detected = True
-                            print("Keyword Detected!")
+                            # print("Keyword Detected!")
                             break
             got_a_sentence = False
             voiced_frames = []
             # 如果检测到关键词，保存文件
             if audio_active or keyword_detected:
-                print("Wake up!")
+                # print("Wake up!")
                 keyword_detected = False
                 if not api_key_manager.get_key_value('AUDIO_KEY'):
                     # 没有人在使用，尝试获取锁
                     if api_key_manager.set_nx_key('AUDIO_KEY', os.getenv('os_name'), 60 * 1000):
                         # 获取到锁，可以使用
-                        print("Device acquired the lock.")
+                        # print("Device acquired the lock.")
+                        pass
                     else:
                         # 没有获取到锁，有人在使用
-                        print("Device did not acquire the lock. Another device is responding.")
+                        # print("Device did not acquire the lock. Another device is responding.")
                         audio_active = False
                         continue
                 elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
                     # 有人在使用，不要打扰
-                    print("Device did not acquire the lock. Another device is responding2.")
+                    # print("Device did not acquire the lock. Another device is responding2.")
                     audio_active = False
                     continue
                 # write to a wav file
