@@ -32,6 +32,6 @@ def download_file(url: str, save_filename: str):
 
     return os.path.abspath(local_filename)
 
-print(download_file(
-    'https://ask.qcloudimg.com/http-save/yehe-6781431/fc477e39f845d3a223e42da74bbf645a.png?imageView2/2/w/1200',
-    'demo.jpg'))
+# print(download_file(
+#     'https://ask.qcloudimg.com/http-save/yehe-6781431/fc477e39f845d3a223e42da74bbf645a.png?imageView2/2/w/1200',
+#     'demo.jpg'))
