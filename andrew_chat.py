@@ -4,7 +4,7 @@ import traceback
 from config.global_logger import logger
 from paddlespeech.cli.asr.infer import ASRExecutor
 from openai_util.s_auto_gpt import run_conversation_v2, push_message
-from voice_util.kws.audio_kws import get_audio
+from voice_util.kws.audio_kws import get_audio, set_user_input_str
 from voice_util.tts.voice_tts import text_2_audio, stop_speak
 from database_util.redis.redis_client import api_key_manager
 from concurrent.futures import ThreadPoolExecutor
@@ -29,6 +29,7 @@ def get_input():
     global input_str
     while True:
         input_str = input()
+        set_user_input_str(input_str)
         if not input_str:
             continue
         if input_str.lower() == 'stop':
@@ -40,24 +41,24 @@ def get_input():
 executor.submit(get_input)
 while True:
     try:
-        get_audio(audio_active, file_path, last_input_time)
-        # 执行ASR并打印结果
-        audio_text = asr(model='conformer_wenetspeech', audio_file=file_path, force_yes=True)
-        logger.info(f"识别语音：{audio_text}")
-        last_input_time = time.time()
-        audio_active = True
-        if not audio_text:
+        audio_text = None
+        if get_audio(audio_active, file_path, last_input_time):
+            # 执行ASR并打印结果
+            audio_text = asr(model='conformer_wenetspeech', audio_file=file_path, force_yes=True)
+            logger.info(f"识别语音：{audio_text}")
+            last_input_time = time.time()
+            audio_active = True
+        if not audio_text and not input_str:
             continue
-        if '再见' in audio_text or '再見' in audio_text:
-            logger.info("Bye!")
+        if audio_text and '再见' in audio_text:
+            logger.info("再见")
             audio_active = False
             parent_id = '0'
             text_2_audio("再见")
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
                 api_key_manager.delete_key('AUDIO_KEY')
             continue
-        if input_str:
-            audio_text = f"""{input_str} \n{audio_text}"""
+        audio_text = f"""{input_str}\n{audio_text}""" if input_str else audio_text
         push_message({"role": "user", "content": audio_text})
         (answer, msg_Id) = run_conversation_v2(audio_text, parent_id)
         if msg_Id:

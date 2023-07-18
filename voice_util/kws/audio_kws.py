@@ -56,13 +56,26 @@ keyword_detected = False
 last_input_time = 0
 # 如果一段时间内没有检测到有效的输入，就进入待机状态
 idle_timeout = 30
+user_input_str = None
+
+
+def set_user_input_str(str):
+    global user_input_str
+    user_input_str = str
 
 
 def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
-    global triggered, got_a_sentence, voiced_frames, ring_buffer, keyword_detected, last_input_time, idle_timeout
+    global triggered, got_a_sentence, voiced_frames, ring_buffer, keyword_detected, last_input_time, idle_timeout, user_input_str
     if last_time != 0:
         last_input_time = last_time
     while True:
+        if user_input_str and user_input_str != 'stop' and not audio_active:
+            triggered = False
+            voiced_frames = []
+            keyword_detected = False
+            got_a_sentence = False
+            user_input_str = None
+            return False
         chunk = stream.read(CHUNK_SIZE, exception_on_overflow=False)
         active = vad.is_speech(chunk, RATE)
         ring_buffer.append((chunk, active))
@@ -146,3 +159,4 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 wf.writeframes(data)
                 wf.close()
                 break
+    return True
