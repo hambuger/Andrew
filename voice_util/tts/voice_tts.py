@@ -1,10 +1,11 @@
 import os
 import pyttsx3
-import win32com.client
 
 engine = None
-os_name = os.getenv('os_name', 'windows')
+os_name = os.getenv('os_name', 'macos')
 if os_name == 'windows':
+    import win32com.client
+
     engine = win32com.client.Dispatch('SAPI.SPVoice')
 elif os_name == 'macos':
     engine = pyttsx3.init()
