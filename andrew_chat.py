@@ -57,10 +57,13 @@ while True:
             audio_active = False
             parent_id = '0'
             text_2_audio("再见")
+            print('\033[32m' + "再见" + '\033[0m')
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
                 api_key_manager.delete_key('AUDIO_KEY')
             continue
         audio_text = (f"""{input_str}\n{audio_text}""" if audio_text else input_str) if input_str else audio_text
+        if audio_text != input_str:
+            print('\033[32m' + f"韩家宝：{audio_text}" + '\033[0m')
         push_message({"role": "user", "content": audio_text})
         (answer, msg_Id) = run_conversation_v2(audio_text, parent_id)
         if msg_Id:
@@ -69,7 +72,7 @@ while True:
             continue
         push_message({"role": "assistant", "content": answer})
         logger.debug(f"AI回复：{answer}")
-        print(f"AI回复：{answer}")
+        print('\033[31m' + f"AI回复：{answer}" + '\033[0m')
         text_2_audio(answer)
         last_input_time = time.time()
     except Exception as e:
