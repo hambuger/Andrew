@@ -2,7 +2,7 @@ import os
 import pyttsx3
 
 engine = None
-os_name = os.getenv('os_name', 'macos')
+os_name = os.getenv('os_name', 'windows')
 if os_name == 'windows':
     import win32com.client
 
