@@ -4,9 +4,9 @@ from openai_util.function_call.openaifunc_decorator import openai_func
 
 
 @openai_func
-def get_location_by_ip():
+def get_my_location_city():
     """
-    get location by ip
+    get location city of user
     """
     try:
         response = requests.get('http://ip-api.com/json/')

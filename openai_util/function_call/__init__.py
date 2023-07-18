@@ -23,7 +23,7 @@ from code_util.run_python import run_python_code  # noqa: F401
 from info_util.wolfram_alpha_util import query_wolframalpha  # noqa: F401
 
 # 定位
-from info_util.location import get_location_by_ip  # noqa: F401
+from info_util.location import get_my_location_city  # noqa: F401
 
 # 下载文件
-from info_util.download import download_file  # noqa: F401
+from info_util.download import download_file_from_url  # noqa: F401

@@ -4,7 +4,7 @@ from openai_util.function_call.openaifunc_decorator import openai_func
 
 
 @openai_func
-def download_file(url: str, save_filename: str):
+def download_file_from_url(url: str, save_filename: str):
     """
     download file from a url and save it to a file
     :param url: the url of the file
