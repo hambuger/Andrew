@@ -25,9 +25,9 @@ def delete_indices_with_prefix(prefix):
     for index in indices_to_delete:
         response = es.indices.delete(index=index)
         if response["acknowledged"]:
-            logger.info(f"Index '{index}' deleted successfully.")
+            logger.debug(f"Index '{index}' deleted successfully.")
         else:
-            logger.info(f"Failed to delete index '{index}'.")
+            logger.debug(f"Failed to delete index '{index}'.")
 
 
 def deal(sid):
@@ -77,7 +77,7 @@ def upload_file():
                     if not es.indices.exists(index=index_name):
                         # 调用chatgpt3.5模型，传入对话列表
                         message = get_excel_2_es_mapping_prompt_v2(data_list[:10])
-                        logger.info("message{}".format(message))
+                        logger.debug("message{}".format(message))
                         openai.api_key = api_key_manager.get_openai_key()
                         response = openai.ChatCompletion.create(
                             model="gpt-3.5-turbo",
@@ -85,9 +85,9 @@ def upload_file():
                             temperature=0,
                         )
                         content = response['choices'][0]['message']['content']
-                        logger.info("content{}".format(content))
+                        logger.debug("content{}".format(content))
                         mapping = json.loads(content)
-                        logger.info("mapping{}".format(mapping))
+                        logger.debug("mapping{}".format(mapping))
                         es.indices.create(index=index_name, body=mapping)
                         session['mappings'] = mapping
                         session.modified = True
@@ -104,7 +104,7 @@ def upload_file():
                                 try:
                                     processed_item.append(json.loads(value))
                                 except (ValueError, SyntaxError):
-                                    logger.info("无法将 {} 解析为列表，将保存原数据".format(value))
+                                    logger.debug("无法将 {} 解析为列表，将保存原数据".format(value))
                                     processed_item.append(value)
                             else:
                                 processed_item.append(value)
@@ -123,15 +123,15 @@ def upload_file():
                         bulk_insert(actions)
                     return "success"
                 except OpenAIError as e:
-                    logger.info(e)
+                    logger.debug(e)
                     return "failed"
                 except Exception as e:
-                    logger.info(e)
+                    logger.debug(e)
                     return "failed"
             else:
                 return 'Invalid file format. Please upload an Excel file.'
         except Exception as e:
-            logger.info(e)
+            logger.debug(e)
             return 'Error processing file.'
     else:
         return 'Invalid request method.'
@@ -142,7 +142,7 @@ def chat():
     # 获取用户的输入
     api_key_manager.update_key_value(session['sid'], time.time())
     message = request.form['message']
-    logger.info(message)
+    logger.debug(message)
     if not session.get('file_name') or not session.get('mappings'):
         return "请先上传数据或者请等待数据处理完成"
     # 使用 GPT-3 生成回应
@@ -158,7 +158,7 @@ def chat():
     # 返回 GPT-3 的回应
     dslStr = response['choices'][0]['message']['content']
     query = json.loads(dslStr)
-    logger.info("query{}".format(query))
+    logger.debug("query{}".format(query))
     indexList = es.search(index=session['sid'] + '_' + session['file_name'], body=query)
     sourceList = []
     if indexList['hits']['total']['value'] == 0:

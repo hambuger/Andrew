@@ -39,26 +39,28 @@ def get_input():
 
 
 executor.submit(get_input)
+logger.info("语音对话已启动")
+print("语音对话已启动")
 while True:
     try:
         audio_text = None
         if get_audio(audio_active, file_path, last_input_time):
             # 执行ASR并打印结果
             audio_text = asr(model='conformer_wenetspeech', audio_file=file_path, force_yes=True)
-            logger.info(f"识别语音：{audio_text}")
+            logger.debug(f"识别语音：{audio_text}")
             last_input_time = time.time()
             audio_active = True
         if not audio_text and not input_str:
             continue
         if audio_text and '再见' in audio_text:
-            logger.info("再见")
+            logger.debug("再见")
             audio_active = False
             parent_id = '0'
             text_2_audio("再见")
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
                 api_key_manager.delete_key('AUDIO_KEY')
             continue
-        audio_text = f"""{input_str}\n{audio_text}""" if input_str else audio_text
+        audio_text = (f"""{input_str}\n{audio_text}""" if audio_text else input_str) if input_str else audio_text
         push_message({"role": "user", "content": audio_text})
         (answer, msg_Id) = run_conversation_v2(audio_text, parent_id)
         if msg_Id:
@@ -66,7 +68,8 @@ while True:
         if not answer:
             continue
         push_message({"role": "assistant", "content": answer})
-        logger.info(f"AI回复：{answer}")
+        logger.debug(f"AI回复：{answer}")
+        print(f"AI回复：{answer}")
         text_2_audio(answer)
         last_input_time = time.time()
     except Exception as e:

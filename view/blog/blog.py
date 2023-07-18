@@ -16,7 +16,7 @@ def blog():
     id = request.args.get('id')
     parent_id = request.args.get('parentId')
     response = query_data_by_id_or_parent_id(id, parent_id)
-    logger.info(response)
+    logger.debug(response)
     if not response:
         return None
     if id:
