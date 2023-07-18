@@ -24,3 +24,6 @@ from info_util.wolfram_alpha_util import query_wolframalpha  # noqa: F401
 
 # 定位
 from info_util.location import get_location_by_ip  # noqa: F401
+
+# 下载文件
+from info_util.download import download_file  # noqa: F401
