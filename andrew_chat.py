@@ -2,7 +2,7 @@ import time
 import os
 import traceback
 from config.global_logger import logger
-from paddlespeech.cli.asr.infer import ASRExecutor
+from voice_util.asr.asr_invoke import audio_to_text
 from openai_util.s_auto_gpt import run_conversation_v2, push_message
 from voice_util.kws.audio_kws import get_audio, set_user_input_str
 from voice_util.tts.voice_tts import text_2_audio, stop_speak
@@ -11,9 +11,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(10)
 input_str = None
-
-# 创建ASR执行器
-asr = ASRExecutor()
 
 # 记录最后一次检测到有效输入的时间
 last_input_time = 0
@@ -46,7 +43,7 @@ while True:
         audio_text = None
         if get_audio(audio_active, file_path, last_input_time):
             # 执行ASR并打印结果
-            audio_text = asr(model='conformer_wenetspeech', audio_file=file_path, force_yes=True)
+            audio_text = audio_to_text(file_path)
             logger.debug(f"识别语音：{audio_text}")
             last_input_time = time.time()
             audio_active = True
@@ -63,7 +60,7 @@ while True:
             continue
         audio_text = (f"""{input_str}\n{audio_text}""" if audio_text else input_str) if input_str else audio_text
         if audio_text != input_str:
-            print('\033[32m' + f"韩家宝：{audio_text}" + '\033[0m')
+            print('\033[32m' + f"{os.getenv('MY_NAME')}：{audio_text}" + '\033[0m')
         push_message({"role": "user", "content": audio_text})
         (answer, msg_Id) = run_conversation_v2(audio_text, parent_id)
         if msg_Id:
