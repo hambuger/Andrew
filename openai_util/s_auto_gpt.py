@@ -9,12 +9,23 @@ from openai_util.function_call.funcation_invoke import invoke_function, get_invo
 from openai_util.chat import openai_chat_completions, insert_ai_response_record
 
 
+def push_message(message):
+    json_item = json.dumps(message)  # 将字典转换为JSON字符串
+    api_key_manager.r.lpush('AUDIO_CHAT_HISTORY', json_item)
+    api_key_manager.r.ltrim('AUDIO_CHAT_HISTORY', 0, 5)
+
+
+def get_recent_chat_history():
+    byte_list = api_key_manager.r.lrange('AUDIO_CHAT_HISTORY', 0, -1)
+    return [json.loads(item.decode('utf-8')) for item in byte_list]
+
+
 def create_chat_completion(user_content, function_msg, functions=None, function_call=None, message_id='0',
                            parent_id='0'):
     try:
         openai.api_key = api_key_manager.get_openai_key()
         use_model = os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo')
-        messages = [{"role": "user", "content": user_content}]
+        messages = get_recent_chat_history() + [{"role": "user", "content": user_content}]
         if function_msg:
             messages.append(function_msg)
             use_model = os.getenv('GET_METHOD_ARGUMENTS_MODEL', 'gpt-3.5-turbo-0613')
@@ -46,7 +57,7 @@ def create_chat_completion(user_content, function_msg, functions=None, function_
                                        parent_id=parent_id, user_name=os.getenv('MY_NAME', 'default'),
                                        ip="127.0.0.1")
     except OpenAIError as e:
-        logger.info(f"user_content: {user_content}, function_msg: {function_msg}, functions: {functions}")
+        logger.debug(f"user_content: {user_content}, function_msg: {function_msg}, functions: {functions}")
         logger.error(e.message)
         return None
 
@@ -62,29 +73,29 @@ def get_function_result_from_openai_response(response):
         message.get("function_call")
         function_name = message["function_call"]["name"]
         function_args = message["function_call"]["arguments"]
-        logger.info("invoke method：" + function_name + " args：" + str(function_args))
+        logger.debug("invoke method：" + function_name + " args：" + str(function_args))
         return function_name, invoke_function(function_name, function_args)
 
 
-def run_conversation_v1(user_content):
-    selection_response = create_chat_completion(user_content, None,
-                                                [get_invoke_method_info_by_name("get_invoke_method_info")],
-                                                "auto")
-    logger.info("1:" + json.dumps(selection_response))
-    function_name, function_result = get_function_result_from_openai_response(selection_response)
-    if not function_name:
-        return selection_response
-    execution_response = create_chat_completion(user_content, None, [function_result], "auto")
-    logger.info("2:" + json.dumps(execution_response))
-    function_name, function_result = get_function_result_from_openai_response(execution_response)
-    if not function_name:
-        return execution_response
-    final_response = create_chat_completion(user_content, {"role": "function", "name": function_name,
-                                                           "content": json.dumps(function_result), },
-                                            None,
-                                            "auto")
-    logger.info("3:" + json.dumps(final_response))
-    return final_response
+# def run_conversation_v1(user_content):
+#     selection_response = create_chat_completion(user_content, None,
+#                                                 [get_invoke_method_info_by_name("get_invoke_method_info")],
+#                                                 "auto")
+#     logger.debug("1:" + json.dumps(selection_response))
+#     function_name, function_result = get_function_result_from_openai_response(selection_response)
+#     if not function_name:
+#         return selection_response
+#     execution_response = create_chat_completion(user_content, None, [function_result], "auto")
+#     logger.debug("2:" + json.dumps(execution_response))
+#     function_name, function_result = get_function_result_from_openai_response(execution_response)
+#     if not function_name:
+#         return execution_response
+#     final_response = create_chat_completion(user_content, {"role": "function", "name": function_name,
+#                                                            "content": json.dumps(function_result), },
+#                                             None,
+#                                             "auto")
+#     logger.debug("3:" + json.dumps(final_response))
+#     return final_response
 
 
 def create_chat_completion_with_msg(new_msg, functions, func_name=None):
@@ -118,9 +129,9 @@ def run_single_step_chat(index, messages, functions, func_name):
         messages.append({"role": "user", "content": "now you are in step {}".format(index)})
         new_msg = list(messages)
         get_arguments_response = create_chat_completion_with_msg(new_msg, functions, func_name)
-        # logger.info("get_arguments_response:{}".format(json.dumps(get_arguments_response)))
+        # logger.debug("get_arguments_response:{}".format(json.dumps(get_arguments_response)))
         function_name, function_result = get_function_result_from_openai_response(get_arguments_response)
-        logger.info("function_name:{}, function_result:{}".format(function_name, function_result))
+        logger.debug("function_name:{}, function_result:{}".format(function_name, function_result))
         if not function_name:
             return get_arguments_response, json.dumps(function_result)
         new_msg.append(get_arguments_response["choices"][0]["message"])
@@ -128,7 +139,7 @@ def run_single_step_chat(index, messages, functions, func_name):
                         "content": json.dumps(function_result)})
         final_response = create_chat_completion_with_msg(new_msg,
                                                          None)
-        logger.info("final_response:{}".format(json.dumps(final_response)))
+        logger.debug("final_response:{}".format(json.dumps(final_response)))
         messages.append(final_response["choices"][0]["message"])
         messages.append(
             {"role": "assistant", "content": "the result of step {} is: {}".format(index, json.dumps(function_result))})
@@ -144,14 +155,15 @@ def run_conversation_v2(user_content, parent_id):
     step_response = create_chat_completion(user_content, None,
                                            [do_step_by_step()],
                                            "auto", message_id, parent_id)
-    print([do_step_by_step()])
+    logger.debug([do_step_by_step()])
     message = step_response["choices"][0]["message"]
     if not message.get("function_call"):
-        logger.info("response:{}".format(step_response["choices"][0]["message"]['content']))
-        insert_ai_response_record(message['content'], step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default'))
+        logger.debug("response:{}".format(step_response["choices"][0]["message"]['content']))
+        insert_ai_response_record(message['content'], step_response["id"], message_id, '127.0.0.1',
+                                  os.getenv('MY_NAME', 'default'))
         return message['content'], step_response["id"]
     function_args = message["function_call"]["arguments"]
-    logger.info("response:{}".format(json.loads(function_args)))
+    logger.debug("response:{}".format(json.loads(function_args)))
     steps = json.loads(function_args)['steps']
     # order by step_order asc
     steps.sort(key=lambda x: x['step_order'])
@@ -165,10 +177,11 @@ def run_conversation_v2(user_content, parent_id):
     for index, step in enumerate(steps):
         order_step_response, function_result = run_single_step_chat(index, messages, [
             get_invoke_method_info_by_name(step['step_method'])], step['step_method'])
-        logger.info(
+        logger.debug(
             "order:{}, response:{}".format(index, order_step_response["choices"][0]["message"]['content']))
     if order_step_response:
-        insert_ai_response_record(order_step_response["choices"][0]["message"]['content'], order_step_response["id"], message_id, '127.0.0.1', os.getenv('MY_NAME', 'default')
+        insert_ai_response_record(order_step_response["choices"][0]["message"]['content'], order_step_response["id"],
+                                  message_id, '127.0.0.1', os.getenv('MY_NAME', 'default')
                                   )
         return order_step_response["choices"][0]["message"]['content'], order_step_response["id"]
     else:

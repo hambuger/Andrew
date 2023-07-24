@@ -5,8 +5,8 @@ logger = logging.getLogger('my_logger')
 logger.setLevel(logging.INFO)  # 设置日志级别为INFO
 
 # 创建文件处理器并设置级别为INFO
-file_handler = logging.FileHandler('../app.log', encoding='utf-8', mode='a')
-file_handler.setLevel(logging.INFO)
+file_handler = logging.FileHandler('app.log', encoding='utf-8', mode='a')
+file_handler.setLevel(logging.DEBUG)
 
 # 创建 formatter
 formatter = logging.Formatter('%(asctime)s [File: %(filename)s Line: %(lineno)d]: %(message)s',

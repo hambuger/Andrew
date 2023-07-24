@@ -3,6 +3,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from openai_util.function_call.openaifunc_decorator import openai_func
 from concurrent.futures import ThreadPoolExecutor
+import warnings
+
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 from airtest.cli.parser import cli_setup
 from airtest.core.api import *
 

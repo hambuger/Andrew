@@ -72,7 +72,7 @@ def add_message_record(params, message_id, parent_id, user_name, ip):
     content = messages[-1].get("content")
     content_vector = get_embedding(content)
     params['messages'] = generate_messages_v3(content, content_vector, user_name, ip, messages)
-    logger.info('messages: {}'.format(params['messages']))
+    logger.debug('messages: {}'.format(params['messages']))
     # 异步处理保存聊天记录
     executor.submit(insert_history, message_id, parent_id, ip, user_name, user_name, content, content_vector, 0, [])
 
@@ -151,7 +151,7 @@ def deal_request_param():
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)
     ip = request.json.get('ip') or client_ip
     userName = request.json.get('user_name') or 'default'
-    logger.info('ip: {}'.format(ip))
+    logger.debug('ip: {}'.format(ip))
     if not message_id:
         logger.warning('params error: {}'.format(params))
         return None, None, None, None, None
@@ -170,5 +170,5 @@ def hgchat(messages):
         )
         return response
     except Exception as e:
-        logger.info("hgchat error" + str(e))
+        logger.debug("hgchat error" + str(e))
         return None

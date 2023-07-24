@@ -53,7 +53,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
                 break
 
         result = generateChagGPTPrompt3(result, creator)
-        logger.info('generateChagGPTPrompt3: {}'.format(result))
+        logger.debug('generateChagGPTPrompt3: {}'.format(result))
         messages.insert(0, {'role': 'system', 'content': result})
         return messages
     except Exception as e:
@@ -89,7 +89,7 @@ def generate_messages_v2(content, content_vector, creator, ip, messages):
         return newMessages
 
     except Exception as e:
-        logger.info("generate_messages_v2 error: {}".format(e))
+        logger.debug("generate_messages_v2 error: {}".format(e))
         return messages
 
 
@@ -120,6 +120,6 @@ def generate_messages_v1(content, content_vector, creator, ip, messages):
         messages[-1]['content'] = result
         return messages
     except Exception as e:
-        logger.info("generate_messages_v1 error: {}".format(e))
+        logger.debug("generate_messages_v1 error: {}".format(e))
 
         return messages

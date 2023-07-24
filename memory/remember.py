@@ -274,7 +274,7 @@ def get_leaf_sum_content_list(r_content_list):
         try:
             prompt = extract_information_from_messages(''.join(r_content_list))
             extract_info_str = chat_use_stream_ship(prompt)
-            logger.info("extract_info_str: %s", extract_info_str)
+            logger.debug("extract_info_str: %s", extract_info_str)
             if extract_info_str:
                 return json.loads(extract_info_str)
         except Exception:
@@ -322,7 +322,7 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
             try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag)
     except Exception as e:
         logger.exception(e)
-        logger.info(e)
+        logger.debug(e)
 
 
 def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip,
