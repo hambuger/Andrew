@@ -33,7 +33,8 @@ stream = pa.open(format=FORMAT,
                  frames_per_buffer=CHUNK_SIZE)
 
 # 这个key不是用来接口调用的，而是用来一次性验证身份的
-picovoice_access_key = 'oH7xQFgfFONcVY2ll3a7p07sxBBvZqd6dy116lzeig4a2UGmE0+EtQ=='
+# oH7xQFgfFONcVY2ll3a7p07sxBBvZqd6dy116lzeig4a2UGmE0+EtQ==
+picovoice_access_key = os.getenv("PICOVOICE_ACCESS_KEY")
 model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
 porcupine = pvporcupine.create(

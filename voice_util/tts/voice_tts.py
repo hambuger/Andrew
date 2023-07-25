@@ -9,6 +9,9 @@ if os_name == 'windows':
     engine = win32com.client.Dispatch('SAPI.SPVoice')
 elif os_name == 'macos':
     engine = pyttsx3.init()
+elif os_name == 'linux':
+    engine = pyttsx3.init()
+    engine.setProperty('voice', 'zh')
 
 
 def text_2_audio(text):
@@ -16,7 +19,7 @@ def text_2_audio(text):
         engine.Speak(text, 19)
         while engine.Status.RunningState != 1:
             pass
-    elif os_name == 'macos':
+    else:
         engine.setProperty('rate', 120)
         engine.say(text)
         engine.runAndWait()
@@ -28,5 +31,5 @@ def stop_speak():
             engine.Speak('', 2)
             while engine.Status.RunningState != 1:
                 pass  # 等待语音输出完全停止while engine.Status.RunningState != 1:
-    elif os_name == 'macos':
+    else:
         engine.stop()
