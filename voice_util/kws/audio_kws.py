@@ -69,6 +69,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
     global triggered, got_a_sentence, voiced_frames, ring_buffer, keyword_detected, last_input_time, idle_timeout, user_input_str
     if last_time != 0:
         last_input_time = last_time
+    stream.start_stream()
     while True:
         if user_input_str and user_input_str != 'stop' and not audio_active:
             triggered = False
@@ -160,4 +161,5 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 wf.writeframes(data)
                 wf.close()
                 break
+    stream.stop_stream()
     return True
