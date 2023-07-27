@@ -2,6 +2,9 @@ import os
 import pyttsx3
 
 engine = None
+is_playing = False
+stream = None
+p = None
 os_name = os.getenv('os_name', 'windows')
 if os_name == 'windows':
     import win32com.client
@@ -12,34 +15,12 @@ elif os_name == 'macos':
 elif os_name == 'linux':
     import asyncio
     from pydub import AudioSegment
-    from pydub.playback import _play_with_pyaudio
+    import pyaudio
+    from pydub.utils import make_chunks
     import edge_tts
     from paddlespeech.cli.tts.infer import TTSExecutor
 
     engine = TTSExecutor()
-
-playback = None
-is_playing = False
-
-
-class AudioPlayer:
-
-    def play(self, text):
-        global playback, is_playing
-        is_playing = True
-        communicate = edge_tts.Communicate(text, 'zh-CN-YunyangNeural')
-        asyncio.run(communicate.save('output.wav'))
-        playback = _play_with_pyaudio(AudioSegment.from_file('output.wav'))
-        # 音频播放完成后，重置 is_playing 标记
-        is_playing = False
-
-    def stop(self):
-        global playback, is_playing
-        if is_playing:
-            # 在播放时停止音频播放
-            print('stop')
-            playback.stop()
-            is_playing = False
 
 
 def text_2_audio(text):
@@ -52,7 +33,33 @@ def text_2_audio(text):
         engine.say(text)
         engine.runAndWait()
     elif os_name == 'linux':
-        AudioPlayer().play(text)
+        global is_playing, stream, p
+        is_playing = True
+        communicate = edge_tts.Communicate(text, 'zh-CN-YunyangNeural')
+        asyncio.run(communicate.save('output.wav'))
+        p = pyaudio.PyAudio()
+        seg = AudioSegment.from_file('output.wav')
+        stream = p.open(format=p.get_format_from_width(seg.sample_width),
+                        channels=seg.channels,
+                        rate=seg.frame_rate,
+                        output=True)
+
+        # Just in case there were any exceptions/interrupts, we release the resource
+        # So as not to raise OSError: Device Unavailable should play() be used again
+        try:
+            # break audio into half-second chunks (to allows keyboard interrupts)
+            for chunk in make_chunks(seg, 500):
+                if not is_playing:
+                    break
+                stream.write(chunk._data)
+        except BaseException as e:
+            pass
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+        # 音频播放完成后，重置 is_playing 标记
+        is_playing = False
 
 
 def stop_speak():
@@ -64,6 +71,8 @@ def stop_speak():
     elif os_name == 'macos':
         engine.stop()
     elif os_name == 'linux':
-        AudioPlayer().stop()
-
-# text_2_audio("你好，我是安德鲁")
+        global is_playing, stream, p
+        if is_playing:
+            # 在播放时停止音频播放
+            stream.stop_stream()
+            is_playing = False

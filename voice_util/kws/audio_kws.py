@@ -70,6 +70,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
     if last_time != 0:
         last_input_time = last_time
     stream.start_stream()
+    voiced_frames = []
     while True:
         if user_input_str and user_input_str != 'stop' and not audio_active:
             triggered = False
