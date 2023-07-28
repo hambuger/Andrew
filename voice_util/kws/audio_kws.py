@@ -65,7 +65,7 @@ def set_user_input_str(str):
     user_input_str = str
 
 
-def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
+def get_audio(audio_active=False, file_path='tmp/audio.wav', last_time=0):
     global triggered, got_a_sentence, voiced_frames, ring_buffer, keyword_detected, last_input_time, idle_timeout, user_input_str
     if last_time != 0:
         last_input_time = last_time

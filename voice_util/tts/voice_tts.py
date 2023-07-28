@@ -22,6 +22,7 @@ elif os_name == 'linux':
 
     engine = TTSExecutor()
 
+output_path = 'tmp/output.wav'
 
 def text_2_audio(text):
     if os_name == 'windows':
@@ -36,9 +37,9 @@ def text_2_audio(text):
         global is_playing, stream, p
         is_playing = True
         communicate = edge_tts.Communicate(text, 'zh-CN-YunyangNeural')
-        asyncio.run(communicate.save('output.wav'))
+        asyncio.run(communicate.save(output_path))
         p = pyaudio.PyAudio()
-        seg = AudioSegment.from_file('output.wav')
+        seg = AudioSegment.from_file(output_path)
         stream = p.open(format=p.get_format_from_width(seg.sample_width),
                         channels=seg.channels,
                         rate=seg.frame_rate,

@@ -17,7 +17,7 @@ last_input_time = 0
 # 是否激活了语音对话
 audio_active = False
 # 默认音频文件路径
-file_path = 'audio.wav'
+file_path = 'tmp/audio.wav'
 # 记录上一次对话回应消息的ID
 parent_id = '0'
 
