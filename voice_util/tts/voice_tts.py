@@ -5,7 +5,7 @@ engine = None
 is_playing = False
 stream = None
 p = None
-os_name = os.getenv('os_name', 'windows')
+os_name = os.getenv('OS_NAME', 'windows')
 if os_name == 'windows':
     import win32com.client
 
