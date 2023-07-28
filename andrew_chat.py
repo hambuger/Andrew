@@ -17,7 +17,7 @@ last_input_time = 0
 # 是否激活了语音对话
 audio_active = False
 # 默认音频文件路径
-file_path = 'audio.wav'
+file_path = 'tmp/audio.wav'
 # 记录上一次对话回应消息的ID
 parent_id = '0'
 
@@ -55,7 +55,7 @@ while True:
             parent_id = '0'
             text_2_audio("再见")
             print('\033[32m' + "再见" + '\033[0m')
-            if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
+            if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('OS_NAME'):
                 api_key_manager.delete_key('AUDIO_KEY')
             continue
         audio_text = (f"""{input_str}\n{audio_text}""" if audio_text else input_str) if input_str else audio_text
@@ -78,5 +78,5 @@ while True:
         logger.error(traceback.format_exc())
         continue
     finally:
-        if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
+        if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('OS_NAME'):
             api_key_manager.delete_key('AUDIO_KEY')

@@ -33,12 +33,13 @@ stream = pa.open(format=FORMAT,
                  frames_per_buffer=CHUNK_SIZE)
 
 # 这个key不是用来接口调用的，而是用来一次性验证身份的
-picovoice_access_key = 'oH7xQFgfFONcVY2ll3a7p07sxBBvZqd6dy116lzeig4a2UGmE0+EtQ=='
+# oH7xQFgfFONcVY2ll3a7p07sxBBvZqd6dy116lzeig4a2UGmE0+EtQ==
+picovoice_access_key = os.getenv("PICOVOICE_ACCESS_KEY")
 model_dir = os.getenv('KWS_MODEL_DIR', os.getcwd())
 
 porcupine = pvporcupine.create(
     access_key=picovoice_access_key,
-    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + os.getenv('os_name') + '_v2_2_0.ppn')],
+    keyword_paths=[os.path.join(model_dir, '安德鲁_zh_' + os.getenv('OS_NAME') + '_v2_2_0.ppn')],
     model_path=os.path.join(model_dir, 'porcupine_params_zh.pv'),
 )
 # 是否一次语音结束
@@ -64,10 +65,12 @@ def set_user_input_str(str):
     user_input_str = str
 
 
-def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
+def get_audio(audio_active=False, file_path='tmp/audio.wav', last_time=0):
     global triggered, got_a_sentence, voiced_frames, ring_buffer, keyword_detected, last_input_time, idle_timeout, user_input_str
     if last_time != 0:
         last_input_time = last_time
+    stream.start_stream()
+    voiced_frames = []
     while True:
         if user_input_str and user_input_str != 'stop' and not audio_active:
             triggered = False
@@ -106,7 +109,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
         if time.time() - last_input_time > idle_timeout:
             audio_active = False
             keyword_detected = False
-            if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('os_name'):
+            if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('OS_NAME'):
                 api_key_manager.delete_key('AUDIO_KEY')
         if got_a_sentence:
             # print('Processing sentence')
@@ -137,7 +140,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 keyword_detected = False
                 if not api_key_manager.get_key_value('AUDIO_KEY'):
                     # 没有人在使用，尝试获取锁
-                    if api_key_manager.set_nx_key('AUDIO_KEY', os.getenv('os_name'), 60 * 1000):
+                    if api_key_manager.set_nx_key('AUDIO_KEY', os.getenv('OS_NAME'), 60 * 1000):
                         # 获取到锁，可以使用
                         # print("Device acquired the lock.")
                         pass
@@ -146,7 +149,7 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                         # print("Device did not acquire the lock. Another device is responding.")
                         audio_active = False
                         continue
-                elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('os_name'):
+                elif api_key_manager.get_key_value('AUDIO_KEY') != os.getenv('OS_NAME'):
                     # 有人在使用，不要打扰
                     # print("Device did not acquire the lock. Another device is responding2.")
                     audio_active = False
@@ -159,4 +162,5 @@ def get_audio(audio_active=False, file_path='audio.wav', last_time=0):
                 wf.writeframes(data)
                 wf.close()
                 break
+    stream.stop_stream()
     return True

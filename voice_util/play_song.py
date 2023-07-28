@@ -23,7 +23,7 @@ def play_song_with_qq_music(song_name: str):
 
 
 def play_song(song_name):
-    if os.getenv('os_name', 'windows') == 'windows':
+    if os.getenv('OS_NAME', 'windows') == 'windows':
         if not cli_setup():
             auto_setup(__file__, logdir=True, devices=["Windows:///"])
 
