@@ -39,3 +39,9 @@ This project implements the following functions:
 9. Call the mobile phone to make a call through airtest
 10. Depending on the system to decide how to call music playback
 11. query using WolframAlpha
+
+2023-07-28 :
+1. Support windows, linux, macos system operation
+2. Increase the use of Microsoft tts speech synthesis
+3. Support command line input chat, and voice can input text at the same time
+4. Support input stop to stop voice playback
