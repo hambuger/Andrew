@@ -52,16 +52,19 @@ class ApiKeyManager:
 
     # 获取可用的key, 指数退避重试，最多重试3次
     def get_openai_key(self, max_retries=3):
-        for i in range(max_retries):
-            key = self.get_key_script(args=[time.time()])
-            if key is not None:
-                return key.decode()  # Redis返回的key是bytes，需要decode转为str
+        if os.getenv('IGNORE_KEY_LIMIT'):
+            return self.r.lrange('api_keys', 0, 0)[0].decode()
+        else:
+            for i in range(max_retries):
+                key = self.get_key_script(args=[time.time()])
+                if key is not None:
+                    return key.decode()  # Redis返回的key是bytes，需要decode转为str
 
-            # 指数退避
-            backoff_time = 2 ** i + random.uniform(0, 1)
-            time.sleep(backoff_time)
+                # 指数退避
+                backoff_time = 2 ** i + random.uniform(0, 1)
+                time.sleep(backoff_time)
 
-        raise Exception("太多请求，没有可用的key了")
+            raise Exception("太多请求，没有可用的key了")
 
     def get_stream_key_key(self, max_retries=3):
         for i in range(max_retries):
