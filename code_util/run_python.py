@@ -4,13 +4,13 @@ from openai_util.function_call.openaifunc_decorator import openai_func
 
 
 @openai_func
-def run_python_code(command: str, _globals=None, _locals=None) -> str:
+def run_python_code(command: str, _globals=None, _locals=None):
     """
     Run Python code and returns anything printed to stdout.
 
     :param command: The Python code to be executed.
     :param _globals : A dictionary representing the global namespace for the executed code. If not provided, an empty dictionary will be used.
-    :param _local : A dictionary representing the local namespace for the executed code. If not provided, an empty dictionary will be used.
+    :param _locals : A dictionary representing the local namespace for the executed code. If not provided, an empty dictionary will be used.
     """
 
     # If globals or locals dictionaries are not provided, initialize them.

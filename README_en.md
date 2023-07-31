@@ -45,3 +45,7 @@ This project implements the following functions:
 2. Increase the use of Microsoft tts speech synthesis
 3. Support command line input chat, and voice can input text at the same time
 4. Support input stop to stop voice playback
+
+2023-08-01 :  
+Learning and forming non-expressive memory, the primary version, has a low success rate, and it cannot effectively solve the infinite loop problem similar to autoGPT.
+But the main idea has been formed, and the follow-up can continue to be optimized.
