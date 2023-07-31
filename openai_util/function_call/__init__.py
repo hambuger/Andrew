@@ -27,3 +27,6 @@ from info_util.location import get_my_location_city  # noqa: F401
 
 # 下载文件
 from info_util.download import download_file_from_url  # noqa: F401
+
+# 生成图片
+from image_util.image_text import text_to_image  # noqa: F401
