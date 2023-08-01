@@ -66,7 +66,7 @@ def learn_and_save_as_skill(skill_name: str):
     params = {
 
         "messages": [{"role": "user", "content": f'''
-            根据下面的内容生成一个Python代码文件，保存在learn路径下，这个文件应该包含一个函数，功能为{skill_name}。
+            根据下面的内容生成一个Python代码文件，保存在learn_skill路径下，这个文件应该包含一个函数，功能为{skill_name}。
             ```
             {code_str}
             ```
