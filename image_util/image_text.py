@@ -6,7 +6,10 @@ model_id = "stabilityai/stable-diffusion-2-1"
 
 pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
 pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-pipe = pipe.to("cuda")
+try:
+    pipe = pipe.to("cuda")
+except Exception as e:
+    print(e)
 
 
 @openai_func
@@ -18,6 +21,5 @@ def text_to_image(text: str):
     image = pipe(text).images[0]
     image.save(f"""/tmp/{text}.png""")
     return f"""/tmp/{text}.png"""
-
 
 # text_to_image("a phone of a dog")

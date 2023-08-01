@@ -35,4 +35,4 @@ from image_util.image_text import text_to_image  # noqa: F401
 from code_util.learn import learn_and_save_as_skill  # noqa: F401
 
 # 已经学习的技能
-import learn  # noqa: F401
+import learn_skill  # noqa: F401
