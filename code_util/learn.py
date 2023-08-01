@@ -5,8 +5,8 @@ import subprocess
 import openai
 from openai_util.function_call.openaifunc_decorator import openai_func
 from database_util.redis.redis_client import api_key_manager
-from openai_util.function_call.funcation_invoke import get_invoke_method_info_by_name
-from openai_util.s_auto_gpt import get_function_result_from_openai_response
+from openai_util.function_call.funcation_invoke import get_invoke_method_info_by_name, \
+    get_function_result_from_openai_response
 from config.global_logger import logger
 
 install_package = []

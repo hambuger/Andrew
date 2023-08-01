@@ -83,3 +83,18 @@ def do_step_by_step():
             "required": ["steps"]
         }
     }
+
+
+def get_function_result_from_openai_response(response):
+    message = response.choices[0].message
+    if not message.get("function_call"):
+        if not message.get('content'):
+            return None, message.get('content')
+        else:
+            return None, None
+    else:
+        message.get("function_call")
+        function_name = message["function_call"]["name"]
+        function_args = message["function_call"]["arguments"]
+        logger.debug("invoke method：" + function_name + " args：" + str(function_args))
+        return function_name, invoke_function(function_name, function_args)
