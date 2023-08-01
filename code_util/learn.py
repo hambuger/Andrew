@@ -89,7 +89,7 @@ def learn_and_save_as_skill(skill_name: str):
     response2 = openai.ChatCompletion.create(**params)
     get_function_result_from_openai_response(response2)
     try:
-        from learn import *
+        import learn
     except Exception as e:
         logger.error(e)
     return "lean and save as skill successfully."
