@@ -5,7 +5,8 @@ from openai import OpenAIError
 import os
 from database_util.redis.redis_client import api_key_manager
 from config.global_logger import logger
-from openai_util.function_call.funcation_invoke import invoke_function, get_invoke_method_info_by_name, do_step_by_step
+from openai_util.function_call.funcation_invoke import get_invoke_method_info_by_name, do_step_by_step, \
+    get_function_result_from_openai_response
 from openai_util.chat import openai_chat_completions, insert_ai_response_record
 
 
@@ -60,21 +61,6 @@ def create_chat_completion(user_content, function_msg, functions=None, function_
         logger.debug(f"user_content: {user_content}, function_msg: {function_msg}, functions: {functions}")
         logger.error(e.message)
         return None
-
-
-def get_function_result_from_openai_response(response):
-    message = response.choices[0].message
-    if not message.get("function_call"):
-        if not message.get('content'):
-            return None, message.get('content')
-        else:
-            return None, None
-    else:
-        message.get("function_call")
-        function_name = message["function_call"]["name"]
-        function_args = message["function_call"]["arguments"]
-        logger.debug("invoke method：" + function_name + " args：" + str(function_args))
-        return function_name, invoke_function(function_name, function_args)
 
 
 # def run_conversation_v1(user_content):

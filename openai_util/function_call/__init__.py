@@ -34,5 +34,5 @@ from image_util.image_text import text_to_image  # noqa: F401
 # 学习新技能，形成非表述性记忆
 from code_util.learn import learn_and_save_as_skill  # noqa: F401
 
-# 学习到的新技能
-from learn import *  # noqa: F401, F403
+# 已经学习的技能
+import learn_skill  # noqa: F401

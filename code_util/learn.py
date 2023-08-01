@@ -5,8 +5,8 @@ import subprocess
 import openai
 from openai_util.function_call.openaifunc_decorator import openai_func
 from database_util.redis.redis_client import api_key_manager
-from openai_util.function_call.funcation_invoke import get_invoke_method_info_by_name
-from openai_util.s_auto_gpt import get_function_result_from_openai_response
+from openai_util.function_call.funcation_invoke import get_invoke_method_info_by_name, \
+    get_function_result_from_openai_response
 from config.global_logger import logger
 
 install_package = []
@@ -66,7 +66,7 @@ def learn_and_save_as_skill(skill_name: str):
     params = {
 
         "messages": [{"role": "user", "content": f'''
-            根据下面的内容生成一个Python代码文件，保存在learn路径下，这个文件应该包含一个函数，功能为{skill_name}。
+            根据下面的内容生成一个Python代码文件，保存在learn_skill路径下，这个文件应该包含一个函数，功能为{skill_name}。
             ```
             {code_str}
             ```
@@ -89,7 +89,7 @@ def learn_and_save_as_skill(skill_name: str):
     response2 = openai.ChatCompletion.create(**params)
     get_function_result_from_openai_response(response2)
     try:
-        from learn import *
+        import learn_skill
     except Exception as e:
         logger.error(e)
     return "lean and save as skill successfully."
