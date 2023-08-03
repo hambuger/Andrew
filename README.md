@@ -1,27 +1,122 @@
 # HAI-GPT
-[English Version MD](README_en.md)
+[English](README_en.md)
 
-完整的ai助手功能体验入口:  
+## 项目部署运行
+1.下载项目代码:
+> git clone https://github.com/hambuger/HAI-GPT.git  
+
+2.安装依赖项  
+其中最好支持GPU，nvcc版本11.7或者11.8最好  
+> pip install -r requirements.txt  
+
+
+3.安装需要的数据库  
+3.1 由于本项目需要存储长期记忆，并且需要使用一些es的高级功能来做记忆检索，所以需要安装es数据库。
+具体安装es自行Google，安装完成后，需要在es中创建一个名为lang_chat_content的索引，具体方法如下：
+```
+PUT /lang_chat_content
+
+{
+    "mappings":{
+        "properties":{
+            "content_creation_time":{
+                "type":"date"
+            },
+            "content_creator":{
+                "type":"keyword"
+            },
+            "content_importance":{
+                "type":"float"
+            },
+            "content_last_access_time":{
+                "type":"date"
+            },
+            "content_leaf_depth":{
+                "type":"integer"
+            },
+            "content_node_id":{
+                "type":"keyword"
+            },
+            "content_owner":{
+                "type":"keyword"
+            },
+            "content_type":{
+                "type":"keyword"
+            },
+            "content_vector":{
+                "type":"dense_vector",
+                "dims":1536
+            },
+            "creator_ip":{
+                "type":"keyword"
+            },
+            "depend_node_id":{
+                "type":"keyword"
+            },
+            "generated_content":{
+                "type":"text",
+                "fields":{
+                    "keyword":{
+                        "type":"keyword",
+                        "ignore_above":256
+                    }
+                },
+                "analyzer":"ik_max_word"
+            },
+            "parent_id":{
+                "type":"keyword"
+            }
+        }
+    }
+}
+```
+
+3.2 项目中需要使用Redis来做一些锁。  
+还有我使用的openai的单个api_key是有3 times/second的限制的，所以需要使用Redis队列来做一个轮询key机制。
+具体安装Redis自行Google，安装完成后，需要在Redis中创建一个名为api_keys的队列，具体方法如下：
+> lpush api_keys sk-xx1 sk-xx2 sk-xx3
+
+
+4.配置程序变量  
+在项目根目录下创建.env文件，内容如下：
+> ES_HOST=   # es的地址  
+> REDIS_HOST=localhost  # redis的地址   
+> REDIS_PORT=6379 # redis的端口  
+> ENCODING_FOR_MODEL=gpt-3.5-turbo # 计算openai token使用的模型  
+> MY_NAME= #用户名  
+> USE_IMPORTANT_SCORE=True #是否使用对话记录重要性打分  
+> GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # 决定调用步骤时使用的模型  
+> GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # 获取调用方法的参数时使用的模型  
+> DEFAULT_CHAT_MODEL=gpt-3.5-turbo # 默认的聊天模型  
+> ASR_MODEL= # asr模型  BAIDU 或者 WHISPER  
+> WHISPER_MODEL_KEY= # 当使用whisper模式时，使用的api key  
+> OS_NAME=windows # 当前系统名称，windows,linux,macos  
+> PHONE_OS_NAME=android # 手机系统名称，android,ios  
+> WOLFRAMALPHA_ID= # wolframalpha api key  
+> KWS_MODEL_DIR=  # kws模型目录  
+> SERPER_API_KEY= # serper api key  
+> OPEN_WEATHER_MAP_KEY= # open weather map api key  
+> PICOVOICE_ACCESS_KEY= # kws工具使用需要的access key
+
+
+5.运行程序
 > python andrew_chat.py
 
-网页版体验方式：
-> flask run
+6.体验功能  
+语音交流，唤醒词为“安德鲁”，“安德鲁”不必是一句话的开头，只要包含“安德鲁”就可以。  
+唤醒后，会自动听取用户语音，直到用户停止说话30s,或者用户说“再见”，安德鲁会结束语音对话，直到下一次唤醒。    
+命令行输入stop,可终止安德鲁的当前语音播放。    
+支持语音对话，语音+命令行文本对话， 单独命令行文本对话。
 
-
-本项目旨在实现具有人类记忆水平的人工智能。在这种记忆的基础上，进一步提升人工智能的性能。目标如下：   
-1.该人工智能可以通过图灵测试，并且是各种信息交流形式的，包括文本，语音，视频，图片等。    
-2.该人工智能可以控制各种设备，包括但不限于手机，电脑，智能家居，智能车辆等。  
-3.该人工智能可以通过各种方式获取信息，包括但不限于网络，传感器，摄像头，麦克风，GPS等。  
-4.该人工智能可以将代码移植到任意平台和设备上，包括但不限于手机，电脑，智能家居，智能车辆等。  
-5.该人工智能可以通过学习和记忆，不断提升自己的能力，包括但不限于语言能力，控制能力，信息获取能力等。  
-
+## 项目介绍
 本项目实现了以下功能：
 
-1.连续对话：实现了与用户的连续对话交互.  
-2.重要性打分：将用户的对话内容进行重要性评估和打分。  
-3.相关性搜索：对用户的对话内容进行向量相关性搜索。  
-4.对话内容总结和提炼：阶段性地总结和提炼用户与 AI 的对话内容。  
-5.记忆检索：基于重要性、近因性和相关性对记忆进行检索，以供下次对话使用。  
+1. 具有多种交互方式，如语音，文本，图像
+2. 支持Windows，Linux，MacOS
+3. 支持kws语音唤醒，摄像头物体检测，手机端设备控制
+4. 具有长期记忆，并在对话中检索历史记忆
+5. 支持多种信息获取方式，如Google，WolframAlpha，Serper，OpenWeatherMap
+6. 具有持续学习能力，并形成持久程序记忆
 
 2023-06-19 添加：  
 1.通过将用户指令语句和方法名传递给chatgpt，让chagpt判断方法调用顺序并返回json数据  
