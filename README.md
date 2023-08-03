@@ -1,6 +1,6 @@
 # HAI-GPT
-[English](README_en.md)
-
+[English](README_en.md)  
+**本项目是在包含openai gpt等大模型的基础上实现自己的人工智能助手，特别感谢这些大模型，使这些功能得以可能出现。**
 ## 项目部署运行
 1.下载项目代码:
 > git clone https://github.com/hambuger/HAI-GPT.git  

@@ -1,5 +1,6 @@
 # HAI-GPT
-[中文](README.md)
+[中文](README.md)  
+**This project is to realize its own artificial intelligence assistant on the basis of large models including openai GPT, especially thanks to the emergence of these large models, which make these functions possible.**
 
 ## Project Deployment and Running
 
