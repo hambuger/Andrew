@@ -1,26 +1,120 @@
 # HAI-GPT
-[中文版本](README.md)
+[中文](README.md)
 
-Complete ai assistant function experience entrance:
-> python andrew_chat.py
+## Project Deployment and Running
 
-How to experience the web version:
-> flask run
+1. Download the project code:
+   > git clone https://github.com/hambuger/HAI-GPT.git
 
-This project aims to achieve artificial intelligence with human memory level. On the basis of this memory, the performance of artificial intelligence is further improved. The goals are as follows:
-1. The artificial intelligence can pass the Turing test, and it is in various forms of information exchange, including text, voice, video, pictures, etc.
-2. The artificial intelligence can control various devices, including but not limited to mobile phones, computers, smart homes, smart vehicles, etc.
-3. The artificial intelligence can obtain information through various means, including but not limited to networks, sensors, cameras, microphones, GPS, etc.
-4. The artificial intelligence can port the code to any platform and device, including but not limited to mobile phones, computers, smart homes, smart vehicles, etc.
-5. The artificial intelligence can continuously improve its abilities through learning and memory, including but not limited to language ability, control ability, information acquisition ability, etc.
+2. Install dependencies:
+   It is recommended to have GPU support with nvcc version 11.7 or 11.8.
+   > pip install -r requirements.txt
 
-This project implements the following functions:
+3. Install required databases:  
+   3.1 Since this project requires storing long-term memories and using advanced features of Elasticsearch for memory retrieval, you need to install Elasticsearch. Please refer to the documentation to install Elasticsearch on your system. After installation, create an index named "lang_chat_content" in Elasticsearch using the provided mapping.
 
-1. Continuous dialogue: Realize continuous dialogue interaction with users.
-2. Importance scoring: evaluate and score the importance of the user's dialogue content.
-3. Correlation search: Carry out a vector correlation search on the user's dialogue content.
-4. Summarize and refine the dialogue content: Summarize and refine the dialogue content between the user and AI in stages.
-5. Memory Retrieval: Retrieve memories based on importance, recency and relevance for the next conversation.
+```
+PUT /lang_chat_content
+{
+    "mappings": {
+        "properties": {
+            "content_creation_time": {
+                "type": "date"
+            },
+            "content_creator": {
+                "type": "keyword"
+            },
+            "content_importance": {
+                "type": "float"
+            },
+            "content_last_access_time": {
+                "type": "date"
+            },
+            "content_leaf_depth": {
+                "type": "integer"
+            },
+            "content_node_id": {
+                "type": "keyword"
+            },
+            "content_owner": {
+                "type": "keyword"
+            },
+            "content_type": {
+                "type": "keyword"
+            },
+            "content_vector": {
+                "type": "dense_vector",
+                "dims": 1536
+            },
+            "creator_ip": {
+                "type": "keyword"
+            },
+            "depend_node_id": {
+                "type": "keyword"
+            },
+            "generated_content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word"
+            },
+            "parent_id": {
+                "type": "keyword"
+            }
+        }
+    }
+}
+```
+
+   3.2 The project also requires Redis to implement some locking mechanisms.   
+   Additionally, it uses a Redis queue for key rotation due to the limited number of requests for the OpenAI single API key.  
+   Install Redis on your system and create a queue named "api_keys" in Redis.
+
+   > lpush api_keys sk-xx1 sk-xx2 sk-xx3
+
+4. Configure program variables:  
+   Create a .env file in the project root directory and set the following environment variables:
+
+```
+ES_HOST=             # Elasticsearch address
+REDIS_HOST=localhost # Redis address
+REDIS_PORT=6379      # Redis port
+ENCODING_FOR_MODEL=gpt-3.5-turbo  # Model for calculating OpenAI tokens
+MY_NAME=             # User name
+USE_IMPORTANT_SCORE=True         # Whether to use chat history importance scoring
+GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # Model used for invoking steps
+GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # Model used for getting method arguments
+DEFAULT_CHAT_MODEL=gpt-3.5-turbo # Default chat model
+ASR_MODEL=           # ASR model, BAIDU or WHISPER
+WHISPER_MODEL_KEY=   # API key for using Whisper mode
+OS_NAME=windows      # Current system name, windows, linux, macos
+PHONE_OS_NAME=android # Phone system name, android, ios
+WOLFRAMALPHA_ID=     # WolframAlpha API key
+KWS_MODEL_DIR=       # KWS model directory
+SERPER_API_KEY=      # Serper API key
+OPEN_WEATHER_MAP_KEY= # OpenWeatherMap API key
+PICOVOICE_ACCESS_KEY= # Access key required for KWS tool
+```
+
+5. Run the program:
+   > python andrew_chat.py
+
+6. Experience the features:  
+   The program supports multiple interaction modes, such as voice, text, and images. To initiate a voice conversation, use the wake-up word "Andrew." Once woken up, Andrew will listen to the user's voice until they stop speaking for 30 seconds or say "goodbye," and then the voice conversation will end until the next wake-up. You can also stop Andrew's current voice playback by typing "stop" in the command line. The program supports voice-only conversations, voice + command-line text conversations, and standalone command-line text conversations.
+
+## Project Overview
+This project implements the following features:
+
+1. Multiple interaction modes, including voice, text, and image.
+2. Support for Windows, Linux, and macOS.
+3. Support for KWS voice wake-up, camera object detection, and mobile device control.
+4. Long-term memory with memory retrieval during conversations.
+5. Multiple information retrieval methods, such as Google, WolframAlpha, Serper, and OpenWeatherMap.
+6. Continuous learning capabilities, forming persistent program memory.
 
 2023-06-19 Added:
 1. By passing the user instruction statement and method name to chatgpt, let chagpt judge the order of method calls and return json data
