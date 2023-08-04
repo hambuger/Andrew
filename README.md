@@ -4,12 +4,14 @@
 **本项目是在包含openai gpt等大模型的基础上实现自己的人工智能助手，特别感谢这些大模型，使这些功能得以可能出现。**
 ## 项目部署运行
 1.下载项目代码:
-> git clone https://github.com/hambuger/HAI-GPT.git  
-
+```
+git clone https://github.com/hambuger/HAI-GPT.git  
+```
 2.安装依赖项  
 其中最好支持GPU，nvcc版本11.7或者11.8最好  
-> pip install -r requirements.txt  
-
+```
+pip install -r requirements.txt  
+```
 
 3.安装需要的数据库  
 3.1 由于本项目需要存储长期记忆，并且需要使用一些es的高级功能来做记忆检索，所以需要安装es数据库。
@@ -75,33 +77,38 @@ PUT /lang_chat_content
 3.2 项目中需要使用Redis来做一些锁。  
 还有我使用的openai的单个api_key是有3 times/second的限制的，所以需要使用Redis队列来做一个轮询key机制。
 具体安装Redis自行Google，安装完成后，需要在Redis中创建一个名为api_keys的队列，具体方法如下：
-> lpush api_keys sk-xx1 sk-xx2 sk-xx3
+```
+lpush api_keys sk-xx1 sk-xx2 sk-xx3
+```
 
 
 4.配置程序变量  
 在项目根目录下创建.env文件，内容如下：
-> ES_HOST=   # es的地址  
-> REDIS_HOST=localhost  # redis的地址   
-> REDIS_PORT=6379 # redis的端口  
-> ENCODING_FOR_MODEL=gpt-3.5-turbo # 计算openai token使用的模型  
-> MY_NAME= #用户名  
-> USE_IMPORTANT_SCORE=True #是否使用对话记录重要性打分  
-> GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # 决定调用步骤时使用的模型  
-> GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # 获取调用方法的参数时使用的模型  
-> DEFAULT_CHAT_MODEL=gpt-3.5-turbo # 默认的聊天模型  
-> ASR_MODEL= # asr模型  BAIDU 或者 WHISPER  
-> WHISPER_MODEL_KEY= # 当使用whisper模式时，使用的api key  
-> OS_NAME=windows # 当前系统名称，windows,linux,macos  
-> PHONE_OS_NAME=android # 手机系统名称，android,ios  
-> WOLFRAMALPHA_ID= # wolframalpha api key  
-> KWS_MODEL_DIR=  # kws模型目录  
-> SERPER_API_KEY= # serper api key  
-> OPEN_WEATHER_MAP_KEY= # open weather map api key  
-> PICOVOICE_ACCESS_KEY= # kws工具使用需要的access key
-
+```
+ES_HOST=   # es的地址  
+REDIS_HOST=localhost  # redis的地址   
+REDIS_PORT=6379 # redis的端口  
+ENCODING_FOR_MODEL=gpt-3.5-turbo # 计算openai token使用的模型  
+MY_NAME= #用户名  
+USE_IMPORTANT_SCORE=True #是否使用对话记录重要性打分  
+GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # 决定调用步骤时使用的模型  
+GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # 获取调用方法的参数时使用的模型  
+DEFAULT_CHAT_MODEL=gpt-3.5-turbo # 默认的聊天模型  
+ASR_MODEL= # asr模型  BAIDU 或者 WHISPER  
+WHISPER_MODEL_KEY= # 当使用whisper模式时，使用的api key  
+OS_NAME=windows # 当前系统名称，windows,linux,macos  
+PHONE_OS_NAME=android # 手机系统名称，android,ios  
+WOLFRAMALPHA_ID= # wolframalpha api key  
+KWS_MODEL_DIR=  # kws模型目录  
+SERPER_API_KEY= # serper api key  
+OPEN_WEATHER_MAP_KEY= # open weather map api key  
+PICOVOICE_ACCESS_KEY= # kws工具使用需要的access key
+```
 
 5.运行程序
-> python andrew_chat.py
+```
+python andrew_chat.py
+```
 
 6.体验功能  
 语音交流，唤醒词为“安德鲁”，“安德鲁”不必是一句话的开头，只要包含“安德鲁”就可以。  
