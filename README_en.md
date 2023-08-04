@@ -6,11 +6,15 @@
 ## Project Deployment and Running
 
 1. Download the project code:
-   > git clone https://github.com/hambuger/HAI-GPT.git
+```
+git clone https://github.com/hambuger/HAI-GPT.git
+```
 
 2. Install dependencies:
    It is recommended to have GPU support with nvcc version 11.7 or 11.8.
-   > pip install -r requirements.txt
+```
+pip install -r requirements.txt
+```
 
 3. Install required databases:  
    3.1 Since this project requires storing long-term memories and using advanced features of Elasticsearch for memory retrieval, you need to install Elasticsearch. Please refer to the documentation to install Elasticsearch on your system. After installation, create an index named "lang_chat_content" in Elasticsearch using the provided mapping.
@@ -75,8 +79,9 @@ PUT /lang_chat_content
    3.2 The project also requires Redis to implement some locking mechanisms.   
    Additionally, it uses a Redis queue for key rotation due to the limited number of requests for the OpenAI single API key.  
    Install Redis on your system and create a queue named "api_keys" in Redis.
-
-   > lpush api_keys sk-xx1 sk-xx2 sk-xx3
+```
+lpush api_keys sk-xx1 sk-xx2 sk-xx3
+```
 
 4. Configure program variables:  
    Create a .env file in the project root directory and set the following environment variables:
@@ -103,7 +108,9 @@ PICOVOICE_ACCESS_KEY= # Access key required for KWS tool
 ```
 
 5. Run the program:
-   > python andrew_chat.py
+```       
+python andrew_chat.py
+```
 
 6. Experience the features:  
    The program supports multiple interaction modes, such as voice, text, and images. To initiate a voice conversation, use the wake-up word "Andrew." Once woken up, Andrew will listen to the user's voice until they stop speaking for 30 seconds or say "goodbye," and then the voice conversation will end until the next wake-up. You can also stop Andrew's current voice playback by typing "stop" in the command line. The program supports voice-only conversations, voice + command-line text conversations, and standalone command-line text conversations.
