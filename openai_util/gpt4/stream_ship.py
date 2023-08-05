@@ -38,3 +38,5 @@ def chat_use_gpt4(content):
                 return new_task.output.blocks[0].text
             else:
                 return 0
+
+# print(chat_use_gpt4('你好'))
