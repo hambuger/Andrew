@@ -13,11 +13,11 @@ install_package = []
 
 
 def check_and_install_modules_from_code(code):
-    # 使用正则表达式匹配导入模块
-    import_pattern = re.compile(r'\b(?:from|import)\s+(\w+(?:\.\w+)*)')
+    # Use regex to match imported modules
+    import_pattern = re.compile(r'^(?:from\s+)?(\w+)(?:\s+import\b|$)', re.MULTILINE)
     modules_to_install = set(match.group(1) for match in import_pattern.finditer(code))
-
-    # 检查并安装缺失的模块
+    global install_package
+    # Check and install missing modules
     for module in modules_to_install:
         if module in install_package:
             continue
@@ -28,11 +28,16 @@ def check_and_install_modules_from_code(code):
         except ImportError:
             logger.debug(f"{module} is not installed. Installing...")
             try:
-                subprocess.check_call(['pip', 'install', module])
+                # Use a subprocess to execute the pip install command and capture the error output to a variable
+                subprocess.run(['pip', 'install', module], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               text=True,
+                               check=True, encoding='utf-8')
                 logger.debug(f"Successfully installed {module}.")
                 install_package.append(module)
             except subprocess.CalledProcessError as e:
-                logger.debug(f"Failed to install {module}. Error: {e}")
+                # output error output of command execution
+                logger.debug(f"Failed to install {module}. Error: {e.stderr}")
+                return e.stderr
 
 
 @openai_func
@@ -43,12 +48,11 @@ def learn_and_save_as_skill(skill_name: str):
     :param skill_name: The name of the skill to be learned.
     """
     openai.api_key = api_key_manager.get_openai_key()
+    method_code_prompt = f'''Generate python code that contains one utility function: {skill_name}.
+Your return response has only the Python code and no other information.'''
     params = {
 
-        "messages": [{"role": "user", "content": f'''
-        生成一个python代码，其中包含一个函数，功能为{skill_name} 。
-        你的返回只需要Python代码，不需要其他信息。
-        '''}],
+        "messages": [{"role": "user", "content": method_code_prompt}],
         "model": 'gpt-4',
         "temperature": 0
     }
@@ -63,24 +67,25 @@ def learn_and_save_as_skill(skill_name: str):
         else:
             code_str = code_str_tmp
             retry_count += 1
+    print_learn_code_prompt = f'''
+            Generate a Python code file according to the following content and save it under the learn_skill path. This file should  contain one utility function: {skill_name}.
+             ```
+             {code_str}
+             ```
+             The written method needs to add the annotation @openai_func, and generate method annotations to ensure that the code is indented, similar to the following:
+             from openai_util.function_call.openaifunc_decorator import openai_func\
+             @openai_func\
+             def function(param1: str, param2: str):\
+                 \'''\
+                 the method description\
+                 :param param1: the description of param1\
+                 :param param2: the description of param2\
+                 \'''\
+                 pass\
+            '''
     params = {
 
-        "messages": [{"role": "user", "content": f'''
-            根据下面的内容生成一个Python代码文件，保存在learn_skill路径下，这个文件应该包含一个函数，功能为{skill_name}。
-            ```
-            {code_str}
-            ```
-            写入的方法需要加入注解@openai_func，并且生成方法注释，保证代码缩进，类似下面：
-            from openai_util.function_call.openaifunc_decorator import openai_func\
-            @openai_func\
-            def function(param1: str, param2:str):\
-                \'''\
-                the method description\
-                :param param1: the description of param1\
-                :param param2: the description of param2\
-                \'''\
-                pass\
-            '''}],
+        "messages": [{"role": "user", "content": print_learn_code_prompt}],
         "model": 'gpt-4',
         "temperature": 0,
         "functions": [get_invoke_method_info_by_name("run_python_code")],
@@ -99,16 +104,39 @@ last_error = None
 
 
 def test_code(code_str, skill_name):
-    check_and_install_modules_from_code(code_str)
+    # logger.debug(code_str)
+    pip_error = check_and_install_modules_from_code(code_str)
     openai.api_key = api_key_manager.get_openai_key()
+    if pip_error:
+        fix_code_prompt = f'''
+        The following code contains the module that needs to be installed, but the installation failed.
+         Please modify the code and reply with the modified code.
+         the code is:
+         ``` 
+         {code_str}
+         ```
+         the error message is: 
+         ```
+         {pip_error}
+         ```
+        '''
+        fix_params = {
+            "messages": [{"role": "user", "content": fix_code_prompt}],
+            "model": 'gpt-4',
+            "temperature": 0
+        }
+        fix_response = openai.ChatCompletion.create(**fix_params)
+        return fix_response['choices'][0]['message']['content']
+    test_code_prompt = f'''
+            Verify that the following code satisfies the function: {skill_name}
+             ```
+             {code_str}
+             ```
+             If satisfied, reply with a word 'OK' directly, if not, please modify the code and reply with the modified code.
+            '''
+    messages = [{"role": "user", "content": test_code_prompt}]
     params = {
-        "messages": [{"role": "user", "content": f'''
-            验证下面的代码是否满足功能：{skill_name}
-            ```
-            {code_str}
-            ```
-            如果满足，直接回复一个单词'OK'，如果不满足，请修改代码并回复修改后的代码
-            '''}],
+        "messages": messages,
         "model": 'gpt-4',
         "temperature": 0,
         "functions": [get_invoke_method_info_by_name("run_python_code")],
@@ -119,25 +147,16 @@ def test_code(code_str, skill_name):
     global last_error
     if 'Error' in function_result:
         if function_result == last_error:
-            function_result = function_result + ' 这是第二次出现这个错误，请仔细思考并且修改代码'
+            function_result = function_result + \
+                              ' (This is the second time this error occurs, \
+                              please think carefully and modify the code from another way)'
         last_error = function_result
     if function_result:
-        params = {
-            "messages": [{"role": "user", "content": f'''
-                    验证下面的代码是否满足功能：{skill_name}
-                    ```
-                    {code_str}
-                    ```
-                    如果满足，直接回复一个单词'OK'，如果不满足，请修改代码并回复修改后的代码
-                    '''}, response1['choices'][0]['message'], {"role": "function", "name": function_name,
-                                                               "content": json.dumps(function_result)}],
-            "model": 'gpt-4',
-            "temperature": 0,
-            "functions": [get_invoke_method_info_by_name("run_python_code")],
-            "function_call": 'none'
-        }
+        messages.append(response1['choices'][0]['message'])
+        messages.append({"role": "function", "name": function_name,
+                         "content": json.dumps(function_result)})
+        params['messages'] = messages
+        params["function_call"] = 'none'
         response2 = openai.ChatCompletion.create(**params)
         return response2['choices'][0]['message']['content']
     return 'OK'
-
-# learn_and_save_as_skill('获取当前时间的农历日期')
