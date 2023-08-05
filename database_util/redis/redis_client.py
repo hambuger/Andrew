@@ -52,7 +52,7 @@ class ApiKeyManager:
 
     # 获取可用的key, 指数退避重试，最多重试3次
     def get_openai_key(self, max_retries=3):
-        if os.getenv('IGNORE_KEY_LIMIT'):
+        if os.getenv('IGNORE_KEY_LIMIT') == 'True':
             return self.r.lrange('api_keys', 0, 0)[0].decode()
         else:
             for i in range(max_retries):
