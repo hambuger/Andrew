@@ -9,7 +9,7 @@ from redis.exceptions import WatchError
 from database_util.es.es import es
 from database_util.redis.redis_client import api_key_manager
 from openai_util.prompt import get_message_important_score,extract_information_from_messages
-from openai_util.gpt4.stream_ship import chat_use_stream_ship
+from openai_util.gpt4.stream_ship import chat_use_gpt4
 from uuid import uuid4
 from openai_util.embedding import get_embedding
 from openai_util.sum_token import sum_text_token
@@ -261,7 +261,7 @@ def chat_with_single_msg(content):
 
 
 def get_msg_important_score(content):
-    score = chat_use_stream_ship(get_message_important_score(content))
+    score = chat_use_gpt4(get_message_important_score(content))
     try:
         return float(score)
     except ValueError:
@@ -273,7 +273,7 @@ def get_leaf_sum_content_list(r_content_list):
     if r_content_list:
         try:
             prompt = extract_information_from_messages(''.join(r_content_list))
-            extract_info_str = chat_use_stream_ship(prompt)
+            extract_info_str = chat_use_gpt4(prompt)
             logger.debug("extract_info_str: %s", extract_info_str)
             if extract_info_str:
                 return json.loads(extract_info_str)
