@@ -1,23 +1,31 @@
 # HAI-GPT
+
 [![](https://camo.githubusercontent.com/15a53d5ec5d896319068168a27da0203156bbdb9/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f656e676c6973682e737667)](README_en.md)
 [![](https://camo.githubusercontent.com/cb8cb80af654f3dae14a4aa62e44bf62f16953d6/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f6368696e6573652e737667)](README.md)  
-**This project is to realize its own artificial intelligence assistant on the basis of large models including openai GPT, especially thanks to the emergence of these large models, which make these functions possible.**
+**This project is to realize its own artificial intelligence assistant on the basis of large models including openai
+GPT, especially thanks to the emergence of these large models, which make these functions possible.**
 
 ## Project Deployment and Running
 
-1. Download the project code:
+### 1. Download the project code
+
 ```
 git clone https://github.com/hambuger/HAI-GPT.git
 ```
 
-2. Install dependencies:
-   It is recommended to have GPU support with nvcc version 11.7 or 11.8.
+### 2. Install dependencies
+
+It is recommended to have GPU support with nvcc version 11.7 or 11.8.
+
 ```
 pip install -r requirements.txt
 ```
 
-3. Install required databases:  
-   3.1 Since this project requires storing long-term memories and using advanced features of Elasticsearch for memory retrieval, you need to install Elasticsearch. Please refer to the documentation to install Elasticsearch on your system. After installation, create an index named "lang_chat_content" in Elasticsearch using the provided mapping.
+### 3. Install required databases
+
+3.1 Since this project requires storing long-term memories and using advanced features of Elasticsearch for memory
+retrieval, you need to install Elasticsearch. Please refer to the documentation to install Elasticsearch on your system.
+After installation, create an index named "lang_chat_content" in Elasticsearch using the provided mapping.
 
 ```
 PUT /lang_chat_content
@@ -76,15 +84,18 @@ PUT /lang_chat_content
 }
 ```
 
-   3.2 The project also requires Redis to implement some locking mechanisms.   
-   Additionally, it uses a Redis queue for key rotation due to the limited number of requests for the OpenAI single API key.  
-   Install Redis on your system and create a queue named "api_keys" in Redis.
+3.2 The project also requires Redis to implement some locking mechanisms.   
+Additionally, it uses a Redis queue for key rotation due to the limited number of requests for the OpenAI single API
+key.  
+Install Redis on your system and create a queue named "api_keys" in Redis.
+
 ```
 lpush api_keys sk-xx1 sk-xx2 sk-xx3
 ```
 
-4. Configure program variables:  
-   Create a .env file in the project root directory and set the following environment variables:
+### 4. Configure program variables
+
+Create a .env file in the project root directory and set the following environment variables:
 
 ```
 ES_HOST=             # Elasticsearch address
@@ -107,15 +118,22 @@ OPEN_WEATHER_MAP_KEY= # OpenWeatherMap API key
 PICOVOICE_ACCESS_KEY= # Access key required for KWS tool
 ```
 
-5. Run the program:
+### 5. Run the program
+
 ```       
 python andrew_chat.py
 ```
 
-6. Experience the features:  
-   The program supports multiple interaction modes, such as voice, text, and images. To initiate a voice conversation, use the wake-up word "Andrew." Once woken up, Andrew will listen to the user's voice until they stop speaking for 30 seconds or say "goodbye," and then the voice conversation will end until the next wake-up. You can also stop Andrew's current voice playback by typing "stop" in the command line. The program supports voice-only conversations, voice + command-line text conversations, and standalone command-line text conversations.
+### 6. Experience the features
+
+The program supports multiple interaction modes, such as voice, text, and images. To initiate a voice conversation, use
+the wake-up word "Andrew." Once woken up, Andrew will listen to the user's voice until they stop speaking for 30 seconds
+or say "goodbye," and then the voice conversation will end until the next wake-up. You can also stop Andrew's current
+voice playback by typing "stop" in the command line. The program supports voice-only conversations, voice + command-line
+text conversations, and standalone command-line text conversations.
 
 ## Project Overview
+
 This project implements the following features:
 
 1. Multiple interaction modes, including voice, text, and image.
@@ -125,12 +143,25 @@ This project implements the following features:
 5. Multiple information retrieval methods, such as Google, WolframAlpha, Serper, and OpenWeatherMap.
 6. Continuous learning capabilities, forming persistent program memory.
 
-2023-06-19 Added:
-1. By passing the user instruction statement and method name to chatgpt, let chagpt judge the order of method calls and return json data
-2. In theory, a method registration center can be constructed to maintain all the capabilities that chatgpt can call  
-3. todo: You can use the dynamic execution of the language to implement chatgpt to learn new skills, and persist the skills as method codes
+### 2023-08-06
+The second version of the learning logic provides GPT with some capabilities such as Google, pip install, run python and
+save code, allowing it to decide the next call based on the output of the previous step.
+And Google yourself to fix the errors encountered in the study, and finally produce callable code.
 
-2023-07-12 Added:
+### 2023-08-01
+Learning and forming non-expressive memory, the primary version, has a low success rate, and it cannot effectively solve
+the infinite loop problem similar to autoGPT.
+But the main idea has been formed, and the follow-up can continue to be optimized.
+
+### 2023-07-28
+
+1. Support windows, linux, macos system operation
+2. Increase the use of Microsoft tts speech synthesis
+3. Support command line input chat, and voice can input text at the same time
+4. Support input stop to stop voice playback
+
+### 2023-07-12
+
 1. Python code execution function
 2. Voice kws function and use of Baidu Feijiang ASR
 3. Use different tts according to different systems
@@ -143,16 +174,10 @@ This project implements the following features:
 10. Depending on the system to decide how to call music playback
 11. query using WolframAlpha
 
-2023-07-28 :
-1. Support windows, linux, macos system operation
-2. Increase the use of Microsoft tts speech synthesis
-3. Support command line input chat, and voice can input text at the same time
-4. Support input stop to stop voice playback
+### 2023-06-19
 
-2023-08-01 :  
-Learning and forming non-expressive memory, the primary version, has a low success rate, and it cannot effectively solve the infinite loop problem similar to autoGPT.
-But the main idea has been formed, and the follow-up can continue to be optimized.
-
-2023-08-06:  
-The second version of the learning logic provides GPT with some capabilities such as Google, pip install, run python and save code, allowing it to decide the next call based on the output of the previous step.
-And Google yourself to fix the errors encountered in the study, and finally produce callable code.
+1. By passing the user instruction statement and method name to chatgpt, let chagpt judge the order of method calls and
+   return json data
+2. In theory, a method registration center can be constructed to maintain all the capabilities that chatgpt can call
+3. todo: You can use the dynamic execution of the language to implement chatgpt to learn new skills, and persist the
+   skills as method codes
