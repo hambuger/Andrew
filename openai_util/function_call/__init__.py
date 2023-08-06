@@ -31,8 +31,11 @@ from info_util.download import download_file_from_url  # noqa: F401
 # 生成图片
 from image_util.image_text import text_to_image  # noqa: F401
 
-# 学习新技能，形成非表述性记忆
-from code_util.learn import learn_and_save_as_skill  # noqa: F401
-
 # 已经学习的技能
 import learn_skill  # noqa: F401
+
+# pip安装
+from code_util.pip_install import install_modules  # noqa: F401
+
+# 学习新技能，形成非表述性记忆
+from code_util.learn2 import learn_and_save_as_skill, save_method_code  # noqa: F401
