@@ -1,5 +1,5 @@
-# 项目的日志配置
+# Project logging configuration
 from dotenv import load_dotenv
 
-# 加载配置文件
+# load configuration file
 load_dotenv()

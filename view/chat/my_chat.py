@@ -1,20 +1,17 @@
 import os
-# 导入工具
 import sys
 import uuid
 
-# 导入openai模块
 import openai
 from flask import request, render_template, Blueprint, session
 
-# 导入logging模块
 from config.global_logger import logger as logging
 from openai_util.chat import openai_chat_completions
 from database_util.redis.redis_client import api_key_manager
 
 my_chat_route = Blueprint('my_chat', __name__)
 
-proxy_path = os.environ.get('PROXY_PATH', '')  # 获取代理路径
+proxy_path = os.environ.get('PROXY_PATH', '')  # Get proxy path
 
 
 def append_session(in_msg):

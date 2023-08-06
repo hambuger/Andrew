@@ -1,5 +1,5 @@
-# 用来web展示项目功能的视图
-# 现在有自己的博客查看功能，自己的服务器上只能自己看到
-# 网页版的简易chatgpt
-# 试验性的Excel对话页面
-# 和static template文件夹下的文件配合使用
+# A view used to display project functionality on the web
+# Now you have your own blog viewing function, you can only see it on your own server
+# Simple chatgpt for web version
+# Experimental Excel dialog pages
+# Use with files in the static template folder

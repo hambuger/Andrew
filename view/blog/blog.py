@@ -49,14 +49,14 @@ def upload_image():
     if image_file.filename == '':
         return 'Invalid image file', 400
     save_directory = '/var/www/picture'
-    # 使用 MD5 哈希函数生成唯一的字符串
+    # Generate a unique string using the MD5 hash function
     hash_object = hashlib.md5(image_file.filename.encode())
     hex_dig = hash_object.hexdigest()
-    # 将哈希结果作为文件名
+    # Use the hash result as the filename
     filename = hex_dig + '.jpg'
     save_path = os.path.join(save_directory, filename)
     image_file.save(save_path)
 
-    # 返回上传成功的响应，包含保存的图片路径
-    image_url = '/picture/' + filename  # 替换为你的图片访问路径
+    # Return a successful upload response, including the saved image path
+    image_url = '/picture/' + filename  # Replace with your image access path
     return {'message': 'Image uploaded successfully', 'url': image_url}

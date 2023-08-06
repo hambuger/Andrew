@@ -11,7 +11,7 @@ from openai_util.chat import openai_chat_completions, insert_ai_response_record
 
 
 def push_message(message):
-    json_item = json.dumps(message)  # 将字典转换为JSON字符串
+    json_item = json.dumps(message)  # Convert dictionary to JSON string
     api_key_manager.r.lpush('AUDIO_CHAT_HISTORY', json_item)
     api_key_manager.r.ltrim('AUDIO_CHAT_HISTORY', 0, 5)
 
@@ -173,8 +173,8 @@ def run_conversation_v2(user_content, parent_id):
     else:
         return '出错了', None
 
-# print(run_conversation_v2("导航到杭州"))
-# print(run_conversation_v2("如果杭州天气好的话，打电话给gongqi"))
+# print(run_conversation_v2("Navigate to Hangzhou"))
+# print(run_conversation_v2("If the weather in Hangzhou is fine, call gongqi"))
 # print(run_conversation_v2(
-#     "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80  这个图片里车的品牌是什么"))
-# print(run_conversation_v2("放一首七里香"))
+#     "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80  What is the brand of the car in this picture"))
+# print(run_conversation_v2("play a song of 'Welcome Home, Son'"))

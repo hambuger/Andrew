@@ -24,14 +24,14 @@ def fetch_token():
         result = json.loads(s)
         return result["access_token"]
     except Exception as err:
-        print(f"请求token_access失败: {err}")
+        print(f"request token_access fail: {err}")
 
 
 def baidu_asr(file, file_type='pcm', sample_rate=16000):
     asr_url = "http://vop.baidu.com/pro_api"
     length = len(file)
     if length == 0:
-        print(f"这个语音文件 {file} 是空的")
+        print(f"The audio file {file} is empty")
     headers = {
         "Content-Type": "audio/" + file_type + ";rate=" + str(sample_rate),
         "Content-Length": str(length),
@@ -46,10 +46,10 @@ def baidu_asr(file, file_type='pcm', sample_rate=16000):
             return "".join(res["result"])
         else:
             if res["err_msg"] == "request pv too much":
-                print("       出现这个原因很可能是你的百度语音服务调用量超出限制，或未开通付费")
+                print("       The reason for this may be that your Baidu voice service call volume exceeds the limit, or you have not activated payment")
             return ""
     except Exception as err:
-        print(f"百度ASR极速版请求失败: {err}")
+        print(f"Baidu ASR Extreme Edition request failed: {err}")
         return ""
 
 

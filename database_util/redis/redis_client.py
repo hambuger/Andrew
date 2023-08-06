@@ -50,7 +50,7 @@ class ApiKeyManager:
         """
         self.get_stream_ship_key_script = self.r.register_script(self.lua2)
 
-    # 获取可用的key, 指数退避重试，最多重试3次
+    # Get available keys, exponential backoff retry, up to 3 retries
     def get_openai_key(self, max_retries=3):
         if os.getenv('IGNORE_KEY_LIMIT') == 'True':
             return self.r.lrange('api_keys', 0, 0)[0].decode()
@@ -58,25 +58,25 @@ class ApiKeyManager:
             for i in range(max_retries):
                 key = self.get_key_script(args=[time.time()])
                 if key is not None:
-                    return key.decode()  # Redis返回的key是bytes，需要decode转为str
+                    return key.decode()  # The key returned by Redis is bytes, which needs to be decoded into str
 
-                # 指数退避
+                # exponential backoff retry
                 backoff_time = 2 ** i + random.uniform(0, 1)
                 time.sleep(backoff_time)
 
-            raise Exception("太多请求，没有可用的key了")
+            raise Exception("Too many requests, no keys available")
 
     def get_stream_key_key(self, max_retries=3):
         for i in range(max_retries):
             key = self.get_stream_ship_key_script()
             if key is not None:
-                return key.decode()  # Redis返回的key是bytes，需要decode转为str
+                return key.decode()  # The key returned by Redis is bytes, which needs to be decoded into str
 
             # 指数退避
             backoff_time = 2 ** i + random.uniform(0, 1)
             time.sleep(backoff_time)
 
-        raise Exception("太多请求，没有可用的key了")
+        raise Exception("Too many requests, no keys available")
 
     def remove_all_openai_keys(self):
         self.r.delete('api_keys')

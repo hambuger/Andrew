@@ -15,11 +15,11 @@ executor = ThreadPoolExecutor(10)
 @openai_func
 def play_song_with_qq_music(song_name: str):
     """
-    使用qq音乐根据用户提示播放歌曲
-    :param song_name: 歌曲名
+    Use qq music to play songs according to user prompts
+    :param song_name: Song name
     """
     executor.submit(play_song, song_name)
-    return "正在播放歌曲：{}".format(song_name)
+    return "playing song：{}".format(song_name)
 
 
 def play_song(song_name):
@@ -37,33 +37,33 @@ def play_song(song_name):
     else:
         options = webdriver.ChromeOptions()
         options.add_argument(r"user-data-dir=D:\Python\Tools\chromedriver_win32\data")
-        options.add_argument("--start-maximized")  # 最大化窗口
-        options.add_argument("--no-sandbox")  # 禁用沙箱
-        options.add_argument("--disable-dev-shm-usage")  # 禁用开发者模式
+        options.add_argument("--start-maximized")  # maximize window
+        options.add_argument("--no-sandbox")  # disable sandbox
+        options.add_argument("--disable-dev-shm-usage")  # Disable developer mode
         driver_path = r'D:\Python\Tools\chromedriver_win32\chromedriver'
         webdriver_service = Service(driver_path)
         driver = webdriver.Chrome(service=webdriver_service, options=options)
-        # 导航到 QQ 音乐
+        # Navigate to QQ Music
         driver.get("https:/y.qq.com/")
-        # 在搜索框中输入歌曲名
+        # Enter the song name in the search box
         search_field = driver.find_element(By.CLASS_NAME, "search_input__input")
         search_field.clear()
-        # 输入并提交搜索请求
+        # Enter and submit a search request
         search_field.send_keys(song_name)
-        # 寻找并点击播放按钮
+        # Find and hit the play button
         play_button = driver.find_element(By.CLASS_NAME, "search_input__btn")
         play_button.click()
-        time.sleep(3)  # 暂停 3 秒
+        time.sleep(3)  # Pause for 3 seconds
         play_button = driver.find_element(By.LINK_TEXT, "播放全部")
         play_button.click()
-        time.sleep(3)  # 暂停 3 秒
+        time.sleep(3)  # Pause for 3 seconds
         element = driver.find_elements(By.CLASS_NAME, "songlist__time")
         driver.minimize_window()
         time_str = element[0].text
-        # 分割字符串并转换成秒
+        # split string and convert to seconds
         minutes, seconds = map(int, time_str.split(":"))
         total_seconds = minutes * 60 + seconds
         time.sleep(total_seconds)
         driver.quit()
 
-# play_song("六月的雨")
+# play_song("Welcome Home, Son")

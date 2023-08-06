@@ -29,5 +29,5 @@ def register(function_info):
 def get_map_navigation(destination):
     return {
         "destination": destination,
-        "way": "如果你在附近城市，可以选择乘坐高铁到达杭州。杭州有多个高铁站，包括杭州东站、杭州站和杭州南站等。到达高铁站后，你可以通过地铁、出租车或公共汽车等方式前往目的地"
+        "way": "If you are in a nearby city, you can choose to take the high-speed rail to Hangzhou. There are several high-speed rail stations in Hangzhou, including Hangzhou East Railway Station, Hangzhou Railway Station and Hangzhou South Railway Station. After arriving at the high-speed rail station, you can go to your destination by subway, taxi or bus"
     }

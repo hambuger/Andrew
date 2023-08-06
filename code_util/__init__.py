@@ -1,3 +1,2 @@
-# 代码解析或者执行器，用于在运行时获取代码的执行结果或者执行代码
-# 理论上不止python，同时要支持其他的语言
-# todo: 应该还会增加功能是在运行时学习新的技能，并把这个技能以代码的形式保存下来
+# Code parsing or executor, used to obtain the execution result of the code or execute the code at runtime
+# In theory, not only python, but also support other languages

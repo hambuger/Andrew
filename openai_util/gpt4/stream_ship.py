@@ -24,7 +24,7 @@ def chat_use_gpt4(content):
                                                 temperature=0)
         return response['choices'][0]['message']['content']
     else:
-        global generator  # 声明 generator 是一个全局变量
+        global generator
         try:
             task = generator.generate(text=content)
             task.wait()
@@ -32,11 +32,11 @@ def chat_use_gpt4(content):
         except SteamshipError as e:
             if e.code == 'LimitReached':
                 api_key_manager.r.lpop('stream_ship_keys')
-                generator = get_generator()  # 更新全局变量 generator
+                generator = get_generator()
                 new_task = generator.generate(text=content)
                 new_task.wait()
                 return new_task.output.blocks[0].text
             else:
                 return 0
 
-# print(chat_use_gpt4('你好'))
+# print(chat_use_gpt4('hello'))

@@ -15,7 +15,7 @@ def sum_message_token(new_messages):
     return tokens
 
 
-# 第三个版本的prompt，将历史消息和提示放到system提示中
+# The third version of prompt puts historical messages and prompts in the system prompt
 def generate_messages_v3(content, content_vector, creator, ip, messages):
     try:
         length = sum_message_token(messages)
@@ -29,7 +29,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
         node_id_list = []
         update_node_ids = []
         for i, hit in enumerate(response['hits']['hits']):
-            # 将其按照需要的格式添加到列表中
+            # Add it to the list in the desired format
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
             update_node_ids.append(hit['_id'])
@@ -61,7 +61,7 @@ def generate_messages_v3(content, content_vector, creator, ip, messages):
         return messages
 
 
-# 第二版本的prompt，将历史消息当成对话元素放在messages中
+# The second version of prompt puts historical messages as dialog elements in messages
 def generate_messages_v2(content, content_vector, creator, ip, messages):
     try:
         response = query_vector_to_string(content, content_vector, creator, ip)
@@ -72,7 +72,7 @@ def generate_messages_v2(content, content_vector, creator, ip, messages):
         if tokenNum > 3000:
             return newMessages[:-1]
         for i, hit in enumerate(response['hits']['hits']):
-            # 将其按照需要的格式添加到列表中
+            # Add it to the list in the desired format
             user = 'assistant' if hit['_source'].get('content_creator', '') == 'gpt-3.5' else 'user'
             tokenNum = tokenNum + len(encoding.encode(user + hit['_source'].get('generated_content', '')))
             if tokenNum > 3000:
@@ -93,7 +93,7 @@ def generate_messages_v2(content, content_vector, creator, ip, messages):
         return messages
 
 
-# 第一版本的prompt：将历史消息的信息和提示放在user消息的最后一条中
+# The first version of prompt: put the information and prompts of historical messages in the last message of the user
 def generate_messages_v1(content, content_vector, creator, ip, messages):
     try:
         response = query_vector_to_string(content, content_vector, creator, ip)
@@ -102,7 +102,7 @@ def generate_messages_v1(content, content_vector, creator, ip, messages):
         content_list = []
         node_id_list = []
         for i, hit in enumerate(response['hits']['hits']):
-            # 将其按照需要的格式添加到列表中
+            # Add it to the list in the desired format
             node_id_list.append(hit['_source'].get('content_node_id', ''))
             node_id_list.append(hit['_source'].get('parent_id', ''))
         node_id_list = list(filter(None, node_id_list))

@@ -59,7 +59,7 @@ def text_2_audio(text):
             stream.stop_stream()
             stream.close()
             p.terminate()
-        # 音频播放完成后，重置 is_playing 标记
+        # When the audio is done playing, reset the is_playing flag
         is_playing = False
 
 
@@ -68,12 +68,12 @@ def stop_speak():
         if engine.Status.RunningState == 2:
             engine.Speak('', 2)
             while engine.Status.RunningState != 1:
-                pass  # 等待语音输出完全停止while engine.Status.RunningState != 1:
+                pass  # Wait for speech output to stop completely while engine.Status.RunningState != 1:
     elif os_name == 'macos':
         engine.stop()
     elif os_name == 'linux':
         global is_playing, stream, p
         if is_playing:
-            # 在播放时停止音频播放
+            # Stop audio playback while playing
             stream.stop_stream()
             is_playing = False
