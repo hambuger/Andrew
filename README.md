@@ -155,5 +155,5 @@ python andrew_chat.py
 但是主要思路已经形成，后续可以继续优化。
 
 2023-08-06:  
-第二版的学习逻辑，提供给GPT一些能力如Google，pip install, run python和save code,让它自己根据上一步的输出来具体具体下一步的调用，  
+第二版的学习逻辑，提供给GPT一些能力如Google，pip install, run python和save code,让它自己根据上一步的输出来具体决定下一步的调用，  
 并且自己Google来修复学习中遇到的错误，最终产出可调用的代码。
