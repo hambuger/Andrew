@@ -152,3 +152,7 @@ This project implements the following features:
 2023-08-01 :  
 Learning and forming non-expressive memory, the primary version, has a low success rate, and it cannot effectively solve the infinite loop problem similar to autoGPT.
 But the main idea has been formed, and the follow-up can continue to be optimized.
+
+2023-08-06:  
+The second version of the learning logic provides GPT with some capabilities such as Google, pip install, run python and save code, allowing it to specify the next step based on the output of the previous step.
+And Google yourself to fix the errors encountered in the study, and finally produce callable code.
