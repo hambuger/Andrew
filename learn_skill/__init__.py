@@ -1,11 +1,11 @@
 import importlib
 import os
 
-# 获取当前工作目录
+# Get the current working directory
 current_directory = os.getcwd()
 
 try:
-    # 导入模块
+    # import module
     for filename in os.listdir(os.path.join(current_directory, "learn_skill")):
         if filename.endswith(".py") and filename != "__init__.py":
             module_name = "learn_skill." + filename[:-3]

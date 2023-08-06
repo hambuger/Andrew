@@ -1,4 +1,4 @@
-# 声音类的处理工具
-# kws使用porcupine
-# asr支持百度，whisper
-# tts还支持Windows和mac自带的语音合成，其他的太慢了
+# sound processing tools
+# kws use porcupine
+# asr can use BAIDU，whisper
+# tts also supports speech synthesis that comes with Windows and Mac, others are too slow

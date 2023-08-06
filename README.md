@@ -1,187 +1,190 @@
 # HAI-GPT
-[![](https://camo.githubusercontent.com/15a53d5ec5d896319068168a27da0203156bbdb9/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f656e676c6973682e737667)](README_en.md)
-[![](https://camo.githubusercontent.com/cb8cb80af654f3dae14a4aa62e44bf62f16953d6/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f6368696e6573652e737667)](README.md)  
-**本项目是在包含openai gpt等大模型的基础上实现自己的人工智能助手，特别感谢这些大模型，使这些功能得以可能出现。**
-## 项目部署运行
-### 1.下载项目代码
+
+[![](https://camo.githubusercontent.com/cb8cb80af654f3dae14a4aa62e44bf62f16953d6/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f6368696e6573652e737667)](README_ZH.md)  
+**This project is to realize its own artificial intelligence assistant on the basis of large models including openai
+GPT, especially thanks to the emergence of these large models, which make these functions possible.**
+
+## Project Deployment and Running
+
+### 1. Download the project code
+
 ```
-git clone https://github.com/hambuger/HAI-GPT.git  
-```
-### 2.安装依赖项  
-其中最好支持GPU，nvcc版本11.7或者11.8最好  
-```
-pip install -r requirements.txt  
+git clone https://github.com/hambuger/HAI-GPT.git
 ```
 
-### 3.安装需要的数据库  
-#### 3.1 安装es数据库 
-由于本项目需要存储长期记忆，并且需要使用一些es的高级功能来做记忆检索，所以需要安装es数据库。
-具体安装es自行Google，安装完成后，需要在es中创建一个名为lang_chat_content的索引，具体方法如下：
+### 2. Install dependencies
+
+It is recommended to have GPU support with nvcc version 11.7 or 11.8.
+
+```
+pip install -r requirements.txt
+```
+
+### 3. Install required databases
+
+#### 3.1 Install the es database
+
+Since this project requires storing long-term memories and using advanced features of Elasticsearch for memory
+retrieval, you need to install Elasticsearch. Please refer to the documentation to install Elasticsearch on your system.
+After installation, create an index named "lang_chat_content" in Elasticsearch using the provided mapping.
+
 ```
 PUT /lang_chat_content
-
 {
-    "mappings":{
-        "properties":{
-            "content_creation_time":{
-                "type":"date"
+    "mappings": {
+        "properties": {
+            "content_creation_time": {
+                "type": "date"
             },
-            "content_creator":{
-                "type":"keyword"
+            "content_creator": {
+                "type": "keyword"
             },
-            "content_importance":{
-                "type":"float"
+            "content_importance": {
+                "type": "float"
             },
-            "content_last_access_time":{
-                "type":"date"
+            "content_last_access_time": {
+                "type": "date"
             },
-            "content_leaf_depth":{
-                "type":"integer"
+            "content_leaf_depth": {
+                "type": "integer"
             },
-            "content_node_id":{
-                "type":"keyword"
+            "content_node_id": {
+                "type": "keyword"
             },
-            "content_owner":{
-                "type":"keyword"
+            "content_owner": {
+                "type": "keyword"
             },
-            "content_type":{
-                "type":"keyword"
+            "content_type": {
+                "type": "keyword"
             },
-            "content_vector":{
-                "type":"dense_vector",
-                "dims":1536
+            "content_vector": {
+                "type": "dense_vector",
+                "dims": 1536
             },
-            "creator_ip":{
-                "type":"keyword"
+            "creator_ip": {
+                "type": "keyword"
             },
-            "depend_node_id":{
-                "type":"keyword"
+            "depend_node_id": {
+                "type": "keyword"
             },
-            "generated_content":{
-                "type":"text",
-                "fields":{
-                    "keyword":{
-                        "type":"keyword",
-                        "ignore_above":256
+            "generated_content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
                     }
                 },
-                "analyzer":"ik_max_word"
+                "analyzer": "ik_max_word"
             },
-            "parent_id":{
-                "type":"keyword"
+            "parent_id": {
+                "type": "keyword"
             }
         }
     }
 }
 ```
 
-#### 3.2 安装Redis数据库 
-项目中需要使用Redis来做一些锁。  
-还有我使用的openai的单个api_key是有3 times/minute的限制的，所以需要使用Redis队列来做一个轮询key机制。
-具体安装Redis自行Google，安装完成后，需要在Redis中创建一个名为api_keys的队列，具体方法如下：
+#### 3.2 Install the Redis database
+
+The project also requires Redis to implement some locking mechanisms.   
+Additionally, it uses a Redis queue for key rotation due to the limited number of requests for the OpenAI single API
+key.  
+Install Redis on your system and create a queue named "api_keys" in Redis.
+
 ```
 lpush api_keys sk-xx1 sk-xx2 sk-xx3
 ```
 
+### 4. Configure program variables
 
-### 4.配置程序变量  
-在项目根目录下创建.env文件，内容如下：
+Create a .env file in the project root directory and set the following environment variables:
+
 ```
-ES_HOST=   # es的地址  
-REDIS_HOST=localhost  # redis的地址   
-REDIS_PORT=6379 # redis的端口  
-ENCODING_FOR_MODEL=gpt-3.5-turbo # 计算openai token使用的模型  
-MY_NAME= #用户名  
-USE_IMPORTANT_SCORE=True #是否使用对话记录重要性打分  
-GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # 决定调用步骤时使用的模型  
-GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # 获取调用方法的参数时使用的模型  
-DEFAULT_CHAT_MODEL=gpt-3.5-turbo # 默认的聊天模型  
-ASR_MODEL= # asr模型  BAIDU 或者 WHISPER  
-WHISPER_MODEL_KEY= # 当使用whisper模式时，使用的api key  
-OS_NAME=windows # 当前系统名称，windows,linux,macos  
-PHONE_OS_NAME=android # 手机系统名称，android,ios  
-WOLFRAMALPHA_ID= # wolframalpha api key  
-KWS_MODEL_DIR=  # kws模型目录  
-SERPER_API_KEY= # serper api key  
-OPEN_WEATHER_MAP_KEY= # open weather map api key  
-PICOVOICE_ACCESS_KEY= # kws工具使用需要的access key
+ES_HOST=             # Elasticsearch address
+REDIS_HOST=localhost # Redis address
+REDIS_PORT=6379      # Redis port
+ENCODING_FOR_MODEL=gpt-3.5-turbo  # Model for calculating OpenAI tokens
+MY_NAME=             # User name
+USE_IMPORTANT_SCORE=True         # Whether to use chat history importance scoring
+GET_INVOKE_METHOD_MODEL=gpt-3.5-turbo-16k  # Model used for invoking steps
+GET_METHOD_ARGUMENTS_MODEL=gpt-3.5-turbo-0613  # Model used for getting method arguments
+DEFAULT_CHAT_MODEL=gpt-3.5-turbo # Default chat model
+ASR_MODEL=           # ASR model, BAIDU or WHISPER
+WHISPER_MODEL_KEY=   # API key for using Whisper mode
+OS_NAME=windows      # Current system name, windows, linux, macos
+PHONE_OS_NAME=android # Phone system name, android, ios
+WOLFRAMALPHA_ID=     # WolframAlpha API key
+KWS_MODEL_DIR=       # KWS model directory
+SERPER_API_KEY=      # Serper API key
+OPEN_WEATHER_MAP_KEY= # OpenWeatherMap API key
+PICOVOICE_ACCESS_KEY= # Access key required for KWS tool
 ```
 
-### 5.运行程序
-```
+### 5. Run the program
+
+```       
 python andrew_chat.py
 ```
 
-### 6.体验功能  
-语音交流，唤醒词为“安德鲁”，“安德鲁”不必是一句话的开头，只要包含“安德鲁”就可以。  
-唤醒后，会自动听取用户语音，直到用户停止说话30s,或者用户说“再见”，安德鲁会结束语音对话，直到下一次唤醒。    
-命令行输入stop,可终止安德鲁的当前语音播放。    
-支持语音对话，语音+命令行文本对话， 单独命令行文本对话。
+### 6. Experience the features
 
-## 项目介绍
-本项目实现了以下功能：
+The program supports multiple interaction modes, such as voice, text, and images. To initiate a voice conversation, use
+the wake-up word "Andrew." Once woken up, Andrew will listen to the user's voice until they stop speaking for 30 seconds
+or say "goodbye," and then the voice conversation will end until the next wake-up. You can also stop Andrew's current
+voice playback by typing "stop" in the command line. The program supports voice-only conversations, voice + command-line
+text conversations, and standalone command-line text conversations.
 
-1. 具有多种交互方式，如语音，文本，图像
-2. 支持Windows，Linux，MacOS
-3. 支持kws语音唤醒，摄像头物体检测，手机端设备控制
-4. 具有长期记忆，并在对话中检索历史记忆
-5. 支持多种信息获取方式，如Google，WolframAlpha，Serper，OpenWeatherMap
-6. 具有持续学习能力，并形成持久程序记忆
+## Project Overview
 
-## 版本历史
+This project implements the following features:
+
+1. Multiple interaction modes, including voice, text, and image.
+2. Support for Windows, Linux, and macOS.
+3. Support for KWS voice wake-up, camera object detection, and mobile device control.
+4. Long-term memory with memory retrieval during conversations.
+5. Multiple information retrieval methods, such as Google, WolframAlpha, Serper, and OpenWeatherMap.
+6. Continuous learning capabilities, forming persistent program memory.
+
+## Version History
 
 ### 2023-08-06
 
-- 新增功能：...
-- 修复问题：...
-- 改进：第二版的学习逻辑，提供给GPT一些能力如Google，pip install, run python和save
-  code,让它自己根据上一步的输出来具体决定下一步的调用，  
-  并且自己Google来修复学习中遇到的错误，最终产出可调用的代码。
-- todo：...
+The second version of the learning logic provides GPT with some capabilities such as Google, pip install, run python and
+save code, allowing it to decide the next call based on the output of the previous step.
+And Google yourself to fix the errors encountered in the study, and finally produce callable code.
 
 ### 2023-08-01
 
-- 新增功能：学习并形成非表述记忆，初级版本，成功率较低，而且还不能有效解决类似autoGPT的死循环问题。
-  但是主要思路已经形成，后续可以继续优化。
-- 修复问题：...
-- 改进：...
-- todo：...
+Learning and forming non-expressive memory, the primary version, has a low success rate, and it cannot effectively solve
+the infinite loop problem similar to autoGPT.
+But the main idea has been formed, and the follow-up can continue to be optimized.
 
 ### 2023-07-28
 
-- 新增功能：  
-  1.支持windows,linux,macos系统运行  
-  2.增加使用微软tts语音合成  
-  3.支持命令行输入聊天，并且可以语音同时输入文本  
-  4.支持输入stop停止语音播放
-- 修复问题：...
-- 改进：...
-- todo：...
+1. Support windows, linux, macos system operation
+2. Increase the use of Microsoft tts speech synthesis
+3. Support command line input chat, and voice can input text at the same time
+4. Support input stop to stop voice playback
 
 ### 2023-07-12
 
-- 新增功能：  
-  1.python代码执行功能  
-  2.语音kws功能以及使用百度飞浆ASR  
-  3.根据系统不同使用不同的tts  
-  4.调用hugging face开源模型实现图片识别并问答  
-  5.让gpt决定是否调用摄像头来拍照识别  
-  6.使用YouTube播放用户要求的视频  
-  7.调用Google查询用户需要信息  
-  8.查询各地天气  
-  9.通过airtest实现调用手机拨打电话  
-  10.根据系统不同来决定调用音乐播放方式  
-  11.使用WolframAlpha查询
-- 修复问题：...
-- 改进：...
-- todo：...
+1. Python code execution function
+2. Voice kws function and use of Baidu Feijiang ASR
+3. Use different tts according to different systems
+4. Call the hugging face open source model to realize image recognition and question answering
+5. Let gpt decide whether to call the camera to take pictures and identify
+6. Use YouTube to play the video requested by the user
+7. Call Google to query the information the user needs
+8. Check the weather in various places
+9. Call the mobile phone to make a call through airtest
+10. Depending on the system to decide how to call music playback
+11. query using WolframAlpha
 
 ### 2023-06-19
 
-- 新增功能：  
-  1.通过将用户指令语句和方法名传递给chatgpt，让chagpt判断方法调用顺序并返回json数据
-- 修复问题：...
-- 改进：...
-- todo：  
-  1.理论上可以构造一个方法注册中心，维护所有chatgpt可以调用的能力   
-  2.可以使用语言的动态执行实现chatgpt学习新技能，并将技能持久化为方法代码
+1. By passing the user instruction statement and method name to chatgpt, let chagpt judge the order of method calls and
+   return json data
+2. In theory, a method registration center can be constructed to maintain all the capabilities that chatgpt can call
+3. todo: You can use the dynamic execution of the language to implement chatgpt to learn new skills, and persist the
+   skills as method codes

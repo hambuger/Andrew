@@ -1,4 +1,4 @@
-# 信息获取工具
-# 查询谷歌上网页信息
-# 查询天气信息
-# 通过Wolfram查询信息
+# information acquisition tool
+# Query web page information on Google
+# Query weather information
+# Query information through Wolfram

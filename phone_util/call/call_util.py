@@ -16,7 +16,7 @@ def call_someone(name: str):
     :param name: The name of the contact to call
     """
     executor.submit(call, name)
-    return "正在呼叫：{}".format(name)
+    return "calling：{}".format(name)
 
 
 phone_os_name = os.getenv('PHONE_OS_NAME', 'ios')
@@ -42,7 +42,7 @@ def call(name):
         #     return subprocess.Popen(['iproxy', str(local_port), str(device_port)])
         #
         #
-        # # 开启 iproxy
+        # # open iproxy
         # iproxy_process = start_iproxy(8100, 8100)
         if not cli_setup():
             auto_setup(__file__, logdir=True, devices=["ios:///127.0.0.1:8100"])
@@ -54,4 +54,4 @@ def call(name):
         touch((146, 542))
         touch(Template(r"tpl1689057553922.png", record_pos=(-0.109, -0.408), resolution=(1170, 2532)))
 
-# call_someone("爸")
+# call_someone("dad")

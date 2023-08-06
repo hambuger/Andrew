@@ -22,4 +22,4 @@ def get_weather(location_name: str):
         return None
     return weather_url_response['lives'][0]
 
-# print(json.dumps(get_weather('杭州')))
+# print(json.dumps(get_weather('hangzhou')))

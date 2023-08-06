@@ -31,7 +31,7 @@ def model():
 @chat_route.route('/v1/chat/completions', methods=['POST'])
 def openai_chat_completions_for_web():
     try:
-        # 获取传入参数
+        # Get incoming parameters
         (params, message_id, parent_id, userName, ip) = deal_request_param()
         return openai_chat_completions(params, message_id, parent_id, userName, ip)
     except OpenAIError as e:
@@ -39,21 +39,21 @@ def openai_chat_completions_for_web():
         return e.message
     except Exception as e:
         logger.exception("error: {}".format(e))
-        return "未知错误，请联系hamburger"
+        return "Unknown error, please contact hamburger"
 
 
 def openai_chat_completions(params, message_id, parent_id, user_name, ip):
     stream_flag = params.get('stream')
     function_call = params.get('function_call')
-    # 保存聊天历史
+    # save chat history
     add_message_record(params, message_id, parent_id, user_name, ip)
-    # 在调用API时传入参数
+    # Pass in parameters when calling the API
     response = openai.ChatCompletion.create(**params)
-    # 处理流式返回
+    # Handle stream returns
     return deal_stream_response(function_call, stream_flag, response, message_id, user_name, ip)
 
 
-# 设置请求的api_key
+# Set the api_key of the request
 def set_req_api_key(auth_info):
     need_user_api_key = os.getenv('NEED_USER_API_KEY', False) == 'True'
     api_key = None
@@ -66,18 +66,18 @@ def set_req_api_key(auth_info):
     openai.api_key = api_key
 
 
-# 插入用户的聊天记录
+# Insert user's chat history
 def add_message_record(params, message_id, parent_id, user_name, ip):
     messages = params.get('messages')
     content = messages[-1].get("content")
     content_vector = get_embedding(content)
     params['messages'] = generate_messages_v3(content, content_vector, user_name, ip, messages)
     logger.debug('messages: {}'.format(params['messages']))
-    # 异步处理保存聊天记录
+    # Asynchronous processing to save chat records
     executor.submit(insert_history, message_id, parent_id, ip, user_name, user_name, content, content_vector, 0, [])
 
 
-# 插入GPT的返回记录
+# Insert the return record of GPT
 def add_response_record(all_contents, bot_msg_ids, parent_id, ip, user_name):
     content_vector = get_embedding(''.join(all_contents))
     insert_history(bot_msg_ids[0], parent_id, ip, user_name, 'gpt-3.5', ''.join(all_contents), content_vector, 0, [])
@@ -88,7 +88,7 @@ def insert_ai_response_record(content, msg_id, parent_id, ip, user_name):
     insert_history(msg_id, parent_id, ip, user_name, 'gpt-3.5', content, content_vector, 0, [])
 
 
-# 处理流式返回
+# Handle stream returns
 def deal_stream_response(function_call, stream_flag, response, parent_id, user_name, ip):
     all_contents = []
     botMsgIds = []
@@ -111,9 +111,9 @@ def deal_stream_response(function_call, stream_flag, response, parent_id, user_n
         return response
 
 
-# 处理请求参数
+# Handle request parameters
 def deal_request_param():
-    # 获取api_key,判断是否需要使用系统api_key
+    # Get api_key to determine whether you need to use the system api_key
     need_user_api_key = os.getenv('NEED_USER_API_KEY', False) == 'True'
     auth_info = request.headers.get('Authorization')
     api_key = None
@@ -124,28 +124,28 @@ def deal_request_param():
     elif not need_user_api_key:
         api_key = api_key_manager.get_openai_key()
     openai.api_key = api_key
-    # 获取接口参数
+    # Get interface parameters
     req_model = request.json.get('model') or os.getenv('DEFAULT_CHAT_MODEL', 'gpt-3.5-turbo')
     messages_req = request.json.get('messages')
     message_id = messages_req[-1].get('id')
     parent_id = None
     if len(messages_req) > 1:
         parent_id = messages_req[-2].get('id')
-    # 处理前端传入的特殊信息
+    # Handle special information incoming from the front end
     messages = [{k: v for k, v in msg.items() if k in ['role', 'content', 'function_call']} for msg in messages_req]
-    # 存储所有需要检查的字段的名字
+    # Store the names of all fields that need to be checked
     fields_to_check = ['logit_bias', 'temperature', 'top_p', 'n', 'stream', 'stop', 'max_tokens', 'presence_penalty',
                        'frequency_penalty', 'user', 'functions']
-    # 准备API调用的必要参数
+    # Prepare the necessary parameters for the API call
     params = {
         'model': req_model,
         'messages': messages,
     }
-    # 遍历所有需要检查的字段
+    # Iterate through all the fields that need to be checked
     for field in fields_to_check:
-        # 使用 .get() 方法从 request.json 获取字段值
+        # Get field values from request.json using .get() method
         field_value = request.json.get(field)
-        # 如果获取到的字段值非 None，将其加入 params
+        # If the obtained field value is not None, add it to params
         if field_value is not None:
             params[field] = field_value
     client_ip = request.headers.get('X-Forwarded-For', default=request.remote_addr)

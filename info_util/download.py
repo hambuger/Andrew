@@ -10,23 +10,23 @@ def download_file_from_url(url: str, save_filename: str):
     :param url: the url of the file
     :param save_filename: the filename to save
     """
-    # 确保tmp文件夹存在
+    # Make sure the tmp folder exists
     if not os.path.exists('tmp'):
         os.makedirs('tmp')
 
-    # 在tmp文件夹下保存文件
+    # Save the file under the tmp folder
     local_filename = os.path.join('tmp', save_filename)
 
-    # 发送一个HTTP请求到URL
+    # Send an HTTP request to URL
     response = requests.get(url, stream=True)
 
-    # 确保请求成功
+    # Make sure the request is successful
     response.raise_for_status()
 
-    # 打开文件以便写入
+    # open the file for writing
     with open(local_filename, 'wb') as f:
         for chunk in response.iter_content(chunk_size=8192):
-            # 如果有chunk则写入文件
+            # If there is a chunk, write to the file
             if chunk:
                 f.write(chunk)
 

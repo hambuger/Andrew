@@ -1,2 +1,2 @@
-# 长期记忆的存储和处理，给它的定位是大脑的海马体
-# 目前使用es储存记忆信息
+# The storage and processing of long-term memory, its location is the hippocampus of the brain
+# Currently using es to store memory information

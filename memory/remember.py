@@ -37,7 +37,7 @@ def query_by_node_id(node_id_list):
     return es.search(index="lang_chat_content", body=query_body)
 
 
-#  查询相关的文本内容
+#  Query related text content
 def query_vector_to_string(content, query_vector, content_owner, ip):
     query_body = None
     if content_owner and content_owner != "default":
@@ -176,7 +176,7 @@ def query_vector_to_string_v2(content, query_vector, content_owner, ip):
     else:
         logger.warning("query_vector_to_string: content_owner and ip are both None")
         return None
-    # 定义查询
+    # define query
     query_body = {
         "size": 3,
         "query": {
@@ -268,7 +268,7 @@ def get_msg_important_score(content):
         return 0
 
 
-# 插入文档
+# insert document
 def get_leaf_sum_content_list(r_content_list):
     if r_content_list:
         try:
@@ -286,9 +286,9 @@ def get_leaf_sum_content_list(r_content_list):
 
 def insert_history(content_node_id, parent_id, creator_ip, content_owner, creator, content, content_vector,
                    content_leaf_depth, depend_node_ids):
-    # 使用OpenAI的embedding生成向量
+    # Use Open AI's embedding to generate vectors
     try:
-        # 获取当前时间
+        # get current time
         current_time = datetime.now()
         score = 0
         if os.getenv('USE_IMPORTANT_SCORE', 'False') == 'True' and not 'gpt-3.5' == creator:
@@ -297,11 +297,11 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
         if content_leaf_depth > 0:
             content_type = 2
 
-        # 创建文档
+        # create document
         doc = {
             "content_node_id": content_node_id,
-            "content_leaf_depth": content_leaf_depth,  # 这里假设叶子深度为0，你可以根据需要进行修改
-            "content_creator": creator,  # 这里假设内容创建者为"creator"，你可以根据需要进行修改
+            "content_leaf_depth": content_leaf_depth,  # Here it is assumed that the leaf depth is 0, you can modify it as needed
+            "content_creator": creator,  # Here it is assumed that the content creator is "creator", you can modify it as needed
             "content_creation_time": current_time,
             "content_last_access_time": current_time,
             "generated_content": content,
@@ -314,9 +314,9 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
             "depend_node_id": depend_node_ids
         }
         docId = content_owner + "_" + content_node_id
-        # 插入文档
+        # insert document
         es.index(index="lang_chat_content", body=doc, id=docId)
-        # 检查是否需要归纳历史聊天
+        # Check if summary history chat is required
         gpt_flag = 'gpt-3.5' == creator
         if not creator == 'default':
             try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip, gpt_flag)
@@ -328,14 +328,14 @@ def insert_history(content_node_id, parent_id, creator_ip, content_owner, creato
 def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth, content_owner, creator, creator_ip,
                                    gpt_flag):
     current_leaf_context_list_key = content_owner + "_leaf_" + str(content_leaf_depth) + "_text_list"
-    for i in range(5):  # 尝试执行 5 次
+    for i in range(5):  # 5 attempts
         try:
-            # WATCH 列表和长度值
+            # WATCH list and length value
             api_key_manager.r.watch(current_leaf_context_list_key)
             r_content_list = api_key_manager.r.lrange(current_leaf_context_list_key, 0, -1)
             r_content_list = [item.decode() for item in r_content_list]
             after_len = sum_text_token(r_content_list)
-            # gpt4最大token为8000，留给gpt回答1000个，单次用户输入最大为3000token
+            # The maximum token for gpt 4 is 8000, leaving 1000 answers for gpt, and the maximum for a single user input is 3000 tokens
             if after_len > 4000:
                 api_key_manager.r.delete(current_leaf_context_list_key)
                 executor.submit(insert_extract_info_list, content_leaf_depth, content_owner, creator,
@@ -347,29 +347,29 @@ def try_add_extract_info_from_leaf(content_node_id, content, content_leaf_depth,
                     save_r_content = '(' + content_node_id + ')' + 'AI:' + content + '\n'
             else:
                 save_r_content = '(' + content_node_id + ')' + content + '\n'
-            # 开始一个事务
+            # start a transaction
             pipe = api_key_manager.r.pipeline()
-            # 将rpush操作添加到事务
+            # Add rpush operation to transaction
             pipe.rpush(current_leaf_context_list_key, save_r_content)
-            # 尝试执行事务
+            # try to execute transaction
             pipe.execute()
-            # 如果事务成功执行，跳出循环
+            # If the transaction is executed successfully, break out of the loop
             break
         except WatchError:
-            # 其他客户端改变了 WATCH 的键，事务被打断
+            # Other clients change the key of WATCH and the transaction is interrupted
             logger.warning("Concurrent modification, retrying...")
-            time.sleep(1)  # 等待一秒然后重试
+            time.sleep(1)  # wait a second and try again
         except Exception as e:
             logger.exception(e)
             break
         finally:
-            api_key_manager.r.unwatch()  # 清除 WATCH
+            api_key_manager.r.unwatch()  # clean WATCH
 
 
 def insert_extract_info_list(content_leaf_depth, content_owner, creator, creator_ip, r_content_list):
-    # 归纳历史聊天
+    # Inductive History Chat
     context_list = get_leaf_sum_content_list(r_content_list)
-    # 将归纳插入到数据库
+    # Insert induction into database
     if context_list:
         for context in context_list:
             context_vector = get_embedding(context["text"])

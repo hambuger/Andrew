@@ -12,13 +12,13 @@ from concurrent.futures import ThreadPoolExecutor
 executor = ThreadPoolExecutor(10)
 input_str = None
 
-# 记录最后一次检测到有效输入的时间
+# Records the last time a valid input was detected
 last_input_time = 0
-# 是否激活了语音对话
+# Whether voice chat is activated
 audio_active = False
-# 默认音频文件路径
+# Default audio file path
 file_path = 'tmp/audio.wav'
-# 记录上一次对话回应消息的ID
+# Record the ID of the last dialog response message
 parent_id = '0'
 
 
@@ -36,25 +36,26 @@ def get_input():
 
 
 executor.submit(get_input)
-logger.info("语音对话已启动")
-print("语音对话已启动")
+logger.info("Andrew chat started")
+print("Andrew chat started")
 while True:
     try:
         audio_text = None
         if get_audio(audio_active, file_path, last_input_time):
-            # 执行ASR并打印结果
+            # Execute ASR and print the result
             audio_text = audio_to_text(file_path)
-            logger.debug(f"识别语音：{audio_text}")
+            logger.debug(f"Recognize speech：{audio_text}")
             last_input_time = time.time()
             audio_active = True
         if not audio_text and not input_str:
             continue
-        if audio_text and '再见' in audio_text:
-            logger.debug("再见")
+        bye_word = os.getenv('BYE_WORD', 'goodbye')
+        if audio_text and bye_word in audio_text.lower():
+            logger.debug("goodbye!")
             audio_active = False
             parent_id = '0'
-            text_2_audio("再见")
-            print('\033[32m' + "再见" + '\033[0m')
+            text_2_audio(bye_word)
+            print('\033[32m' + "goodbye!" + '\033[0m')
             if api_key_manager.get_key_value('AUDIO_KEY') == os.getenv('OS_NAME'):
                 api_key_manager.delete_key('AUDIO_KEY')
             continue
@@ -68,13 +69,13 @@ while True:
         if not answer:
             continue
         push_message({"role": "assistant", "content": answer})
-        logger.debug(f"AI回复：{answer}")
-        print('\033[31m' + f"AI回复：{answer}" + '\033[0m')
+        logger.debug(f"AI response：{answer}")
+        print('\033[31m' + f"AI response：{answer}" + '\033[0m')
         text_2_audio(answer)
         last_input_time = time.time()
     except Exception as e:
         logger.error(e)
-        # 打印异常堆栈
+        # print exception stack
         logger.error(traceback.format_exc())
         continue
     finally:
