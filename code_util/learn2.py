@@ -64,7 +64,7 @@ def learn_and_save_as_skill(skill_name: str):
     method_code_prompt = f'''
     Generate python code that contains one utility function: {skill_name}.
 You can use Google to query the required information and repair errors, 
-use pip to install the required libraries, 
+use 'install_modules' to install the modules that code required, 
 use 'run_python_code' to check whether the code is correct, 
 and use 'save_method_code' to save the final generated code'''
     learn_skill_messages = [{"role": "user", "content": method_code_prompt}]
@@ -98,7 +98,7 @@ and use 'save_method_code' to save the final generated code'''
             learn_skill_messages.append({"role": "function", "name": function_name,
                                          "content": json.dumps(function_result)})
         print('messages: ', json.dumps(learn_skill_messages))
-    return "lean and save as skill successfully."
+    return f"""lean and save as skill successfully after try {retry_count} times."""
 
 
-# learn_and_save_as_skill('Get the current lunar date representation')
+# print(learn_and_save_as_skill('Get the current lunar date representation'))
