@@ -97,7 +97,7 @@ and use 'save_method_code' to save the final generated code'''
         if function_name:
             learn_skill_messages.append({"role": "function", "name": function_name,
                                          "content": json.dumps(function_result)})
-        print('messages: ', json.dumps(learn_skill_messages))
+        # print('messages: ', json.dumps(learn_skill_messages))
     return f"""lean and save as skill successfully after try {retry_count} times."""
 
 
