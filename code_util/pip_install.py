@@ -2,6 +2,7 @@ import subprocess
 
 from config.global_logger import logger
 from openai_util.function_call.openaifunc_decorator import openai_func
+import importlib
 
 install_package = []
 
@@ -21,7 +22,7 @@ def install_modules(modules_list: list):
         if module in install_package:
             continue
         try:
-            __import__(module)
+            importlib.import_module(module)
             logger.debug(f"{module} is already installed.")
             install_package.append(module)
         except ImportError:
