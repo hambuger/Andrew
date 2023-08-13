@@ -1,6 +1,8 @@
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from openai_util.function_call.openaifunc_decorator import openai_func
+import os
+import time
 
 model_id = "stabilityai/stable-diffusion-2-1"
 
@@ -10,16 +12,17 @@ try:
     pipe = pipe.to("cuda")
 except Exception as e:
     print(e)
-
+tmp_dir = os.path.join(os.getcwd(), "tmp")
 
 @openai_func
 def text_to_image(text: str):
     """
-    generate image from text with english
-    :param text: the text use english, for example: "a phone of a dog"
+    generate image from english text
+    :param text: the text must use english, for example: "a phone of a dog"
     """
     image = pipe(text).images[0]
-    image.save(f"""/tmp/{text}.png""")
-    return f"""/tmp/{text}.png"""
+    image_path = os.path.join(tmp_dir, f"{str(int(time.time()))}.png")
+    image.save(image_path)
+    return image_path
 
 # text_to_image("a phone of a dog")
