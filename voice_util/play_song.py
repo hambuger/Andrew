@@ -27,7 +27,7 @@ def play_song(song_name):
         if not cli_setup():
             auto_setup(__file__, logdir=True, devices=["Windows:///"])
 
-        start_app(r"D:\QQMUSIC\QQMusic1906.19.30.14\QQMusic.exe")
+        start_app(r"D:\QQMUSIC\QQMusic1942.22.37.01\QQMusic.exe")
         touch(Template(r"tpl1689091307120.png", record_pos=(-0.258, -0.264), resolution=(1920, 1080)))
         text(song_name)
         touch(Template(r"tpl1689095239431.png", record_pos=(-0.191, -0.265), resolution=(1920, 1080)))
