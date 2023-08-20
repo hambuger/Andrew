@@ -1,4 +1,4 @@
-# HAI-GPT
+# Andrew
 [![](https://camo.githubusercontent.com/15a53d5ec5d896319068168a27da0203156bbdb9/68747470733a2f2f6a617977636a6c6f76652e6769746875622e696f2f73622f6c616e672f656e676c6973682e737667)](README.md)  
 **本项目是在包含openai gpt等大模型的基础上实现自己的人工智能助手，特别感谢这些大模型，使这些功能得以可能出现。**
 ## 项目部署运行
