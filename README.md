@@ -9,7 +9,7 @@ GPT, especially thanks to the emergence of these large models, which make these 
 ### 1. Download the project code
 
 ```
-git clone https://github.com/hambuger/HAI-GPT.git
+git clone https://github.com/hambuger/Andrew.git
 ```
 
 ### 2. Install dependencies

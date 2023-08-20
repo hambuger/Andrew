@@ -4,7 +4,7 @@
 ## 项目部署运行
 ### 1.下载项目代码
 ```
-git clone https://github.com/hambuger/HAI-GPT.git  
+git clone https://github.com/hambuger/Andrew.git  
 ```
 ### 2.安装依赖项  
 其中最好支持GPU，nvcc版本11.7或者11.8最好  
