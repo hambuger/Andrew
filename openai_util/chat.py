@@ -16,6 +16,9 @@ chat_route = Blueprint('chat', __name__)
 
 executor = ThreadPoolExecutor(10)
 
+os.environ["http_proxy"] = "http://127.0.0.1:7890"
+os.environ["https_proxy"] = "http://127.0.0.1:7890"
+
 
 # @chat_route.route('/v1/models', methods=['GET'])
 def model():
